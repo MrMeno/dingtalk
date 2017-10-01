@@ -1,0 +1,62 @@
+<template>
+		<el-menu id='sidebar' :router='true'  default-active="1" theme="dark"  class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose">
+		 <el-menu-item index="/main">
+     <!-- <i class="el-icon-menu"></i> --><i class="fa fa-home" aria-hidden="true"></i>
+    主页
+   </el-menu-item>
+      <el-menu-item index="/ticks">
+      <!-- <i class="el-icon-setting"></i> -->
+      <i class="fa fa-ticket" aria-hidden="true"></i>
+      票据
+    </el-menu-item>
+      <el-submenu index="/tools">
+        <template slot="title">
+          <i class="fa fa-wrench" aria-hidden="true"></i>
+         <!--  <i class="el-icon-message">  
+          </i> -->工具
+      </template>
+        <el-menu-item-group>
+          <el-menu-item index="/tools/bank">行号查询
+        </el-menu-item>
+        </el-menu-item-group>
+        <el-menu-item-group>
+          <el-menu-item index="/tools/broad">公示催告
+        </el-menu-item>
+        </el-menu-item-group>
+          <el-menu-item-group>
+          <el-menu-item index="/tools/cacul">贴现计算
+        </el-menu-item>
+        </el-menu-item-group>
+          <el-menu-item-group>
+          <el-menu-item index="/tools/dateLink">开票日历
+        </el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>  
+<!--        <el-menu-item index="4">
+       <i class="el-icon-setting"></i>消息
+     </el-menu-item> -->
+    </el-menu>
+</template>
+<script>
+export default {
+  name: 'sidebar',
+  data(){
+  	return{
+
+  	}
+  },
+   methods: {
+      handleOpen(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose(key, keyPath) {
+        console.log(key, keyPath);
+      }
+    }
+}
+</script>
+<style scoped>
+	.el-menu-vertical-demo{
+		max-width: 150px;
+	}
+</style>
