@@ -1,114 +1,87 @@
 <template>
   <div id="app">
-    <div class="container-fluid" style='background-color:#E2E4EA;'>
+    <div class="container-fluid" style='background-color:#f5f5f5;'>
       <div class="row" style='position:fixed;top:0px;left:0px;right:0px;z-index:999;min-height:50px'>
         <div class="col col-md-12 col-sm-12">
-          <div class="row" style='background-color:white;padding: 10px;box-shadow:0px 3px 3px #999'>
-            <div class="col col-md-2 col-sm-2 text-center" >
-              <h4>票据管家</h4>
+          <div class="row" style='background-color:white;height:50px;line-height:50px'>
+            <div class="col col-md-2 col-sm-2 text-center">
+               <h4>票据管家</h4>
             </div>
-              <div class="col col-md-6 col-sm-6 col-md-offset-4 col-sm-offset-4" >
-                 <div class="row">
-                   <div class="col col-md-4 col-sm-4" style="border-right:solid 1px #eee">
-                       <el-dropdown @command="handleCommand">
-                         <el-button type="primary" size="small">
-                         添加票据<i class="el-icon-caret-bottom el-icon--right"></i>
-                        </el-button>
-                        <el-dropdown-menu slot="dropdown" size="small">
-                       <el-dropdown-item command='a'>手动添加</el-dropdown-item>
-                        <el-dropdown-item command='b'>OCR识别</el-dropdown-item>
-                      </el-dropdown-menu>
-                    </el-dropdown>
-                   </div>
-                   <div class="col col-md-4 col-sm-4" style="border-right:solid 1px #eee">
-                    <el-popover trigger="hover">
-                    <img src="./assets/logo.png" class='codeImg'>
-                       <span slot="reference">                      
-                        <i class="fa fa-question-circle-o" aria-hidden="true"  style='padding:10px 0px'>
-                        </i>
-                        帮助
-                      </span>
-                    </el-popover>
-                    
-                   </div>
-                   <div class="col col-md-4 col-sm-4">
-                       <img v-bind:src="avatorUrl" alt="..." class="img-circle" style=''>{{userName}}
-                   </div> 
-                 </div>  
+              <div class="col col-md-4 col-sm-4 col-md-offset-6 col-sm-offset-6" >
+                 <div class="row text-right"  style='line-height'>    
+               <col class="col-md-12 col-sm-12 text-right">
+                    <ul class='user_tabs'>
+                      <li>
+                          <el-dropdown @command="handleCommand">
+                           <el-button type="primary" size="small">
+                            添加票据<i class="el-icon-caret-bottom el-icon--right"></i>
+                           </el-button>
+                           <el-dropdown-menu slot="dropdown" size="small">
+                           <el-dropdown-item command='a'>手动添加</el-dropdown-item>
+                            <el-dropdown-item command='b'>OCR识别</el-dropdown-item>
+                          </el-dropdown-menu>
+                        </el-dropdown>
+                      </li>
+                      <li style='border-left:solid 1px #ddd;border-right:solid 1px #ddd;height:80%'>
+                          <el-popover trigger="hover">
+                           <img src="./assets/crcode.png" class='codeImg'>
+                            <p>扫描二维码进入钉钉群组</p>
+                             <span slot="reference">                      
+                           <i class="fa fa-question-circle-o" aria-hidden="true"  style='padding:10px 0px'>
+                          </i>
+                          帮助
+                        </span>
+                        </el-popover>
+                      </li>
+                      <li>
+                        <img v-bind:src="avatorUrl" v-if="avatorUrl!=''" alt="..." class="img-circle"> 
+                          <img src="./assets/default_h.png" v-else  class="img-circle">
+                           {{userName}}
+                      </li>
+                    </ul>
               </div>
           </div>
         </div>
       </div>
-      <div class="row" style='padding-top:50px;display:flex;'>
-        <div class="text-left" style='width:150px;background-color:#324157' :style="{height:maxHeight+10+'px'}">
+      </div>
+      <div class="row" style='padding-top:50px;display:flex;' :style="{height:maxHeight-80+'px'}">
+        <div class="text-left" style='width:150px;background-color:#324157'>
           <sidebar></sidebar>
         </div>
         <div style='flex:0.01'>
           
         </div>
-        <div  style='flex:2' :style="{height:maxHeight+10+'px'}">   
+        <div  style='flex:2;'>   
          <router-view></router-view>
         </div>
       </div>
-      <div class="row">
-        <div class="col col-md-12 col-sm-12">
-          <el-dialog title="OCR上传票面" size='small' :visible.sync="dialogVisible" :before-close='closeDialog'>
-              <div class="row">
-                 <div class="col col-md-6 col-sm-6 text-center">
-                     <div class="row">
-                       <div class="col col-md-2 col-sm-2">
-                         
-                       </div>
-                        <div class="col col-md-8 col-sm-8">
-                           <div class="pic_tab">
-                          
-                              <span class='words'>上传票面</span>
-                              <input type="file" accept="image/*" class='file'
-                              @change='setPic($event,0)' ref='picss'>
-                         <img v-bind:src="hostUrl+frontUrl" v-if="frontUrl!=''" class='preImg'>
+             <div class="row">
+              <div class="col col-md-12 col-sm-12">
+                <el-dialog title="编辑图片" size='small' :visible.sync="dialogVisible">
+                 <el-row :gutter='20'>
+                   <el-col :span='12' v-for='(items,index) in photoList' style='padding:0px 20px' v-loading='imgLoading'>
+                     <img :src="hostUrl+items.picUrl" alt="" class='pic_item'>
+                     <img src="./assets/del.png" alt="" class='btn_del' @click='delPic(index)'>
+                     <p>{{items.picType=='back'?'票据背面':'票据正面'}}</p>
+                   </el-col>
+                    <el-col :span='12' style='padding:20px' v-if='!hasFront||photoList.length==0'>
+                        <div class="pic_tab" v-loading='imgLoading'>
+                             <input type="file" accept="image/jpeg,image/png,image/bmp,image/gif" class='file'
+                              @change='setPic($event,0)' ref='pic'>
+                              <p style='color:#ddd;font-size:20px'>票据正面</p>
                            </div>
-                       </div>
-                        <div class="col col-md-2 col-sm-2">
-                         
-                       </div>
-                     </div>
-
-                     <div class="row text-center" style='padding:10px 0px'>
-                        <div class="col col-md-12 col-sm-12">
-                          票据正面
-                        </div>
-                     </div>
-                 </div>
-                <div class="col col-md-6 col-sm-6 text-center">
-                        <div class="row">
-                       <div class="col col-md-2 col-sm-2">
-                           
-                       </div>
-                        <div class="col col-md-8 col-sm-8">
-                          <div class="pic_tab" >
-                             <span class='words'>上传票面</span>
-                             <input type="file" accept="image/*" class='file'
+                   </el-col>
+                   <el-col :span='12' style='padding:20px'>
+                        <div class="pic_tab" v-loading='imgLoading'>
+                             <input type="file" accept="image/jpeg,image/png,image/bmp,image/gif" class='file'
                               @change='setPic($event,1)' ref='pics'>
-                             <img v-bind:src="hostUrl+backUrl" v-if="backUrl!=''" class='preImg'>
-                            
+                               <p style='color:#ddd;font-size:20px'>票据背面</p>
                            </div>
-                       </div>
-                        <div class="col col-md-2 col-sm-2">
-                         
-                       </div>
-                     </div>
-
-                      <div class="row text-center" style='padding:10px 0px'>
-                        <div class="col col-md-12 col-sm-12">
-                          票据背面
-                        </div>
-                     </div>
-                </div>    
-              </div>
-
+                   </el-col>
+                 </el-row>
               <div class="row">
                 <div class="col col-md-12 col-sm-12">
-                  <p style='color:#a9abaf'>请上传格式为pdf、jpg、png、bmp格式，小于4M的图片</p>
+                  <p style='color:#a9abaf'>请上传格式为gif、jpg、png、bmp格式，大于4KB小于4M的图片</p>
                     <p style='color:#a9abaf'>预计处理时长为30-60秒，工作日：9:00~18:00</p>
                 </div>
               </div>
@@ -123,14 +96,16 @@
                 </div>
               </div>
           </el-dialog>
+          </div>
         </div>
-      </div>
     </div>
   </div>
 </template>
 <script>
 import sidebar from '@/components/sideBar';
-import {authCode} from '@/lib/util';
+
+import {imgCheck,arrRemove} from '@/lib/tools';
+  import cookies from 'js-cookie';
 export default {
   name: 'app',
   components:{
@@ -139,61 +114,57 @@ export default {
   data(){
     return{
       corpId:"",
-      userId:"",
-      userName:'',
-      avatorUrl:'',
       dialogVisible:false,
-      backUrl:'',
       hostUrl:'',
-      frontUrl:'',
-      maxHeight:''
+      url:'',
+      maxHeight:'',
+      photoList:[],
+      imgLoading:false,
+      hasFront:false
     }
+  },
+  computed:{
+   avatorUrl:function(){
+    return cookies.get('avatorUrl',{path:'/'})
+   },
+   userName:function(){
+    return cookies.get('userName',{path:'/'})
+   }
   },
   created(){ 
     let self=this;
    self.maxHeight=window.screen.availHeight;
-    this.corpId=(window.location.href.split('?')[1]).split('=')[1];
-    // console.log(this.corpId)
-    this.getOauth();
+    this.corpId=this.$route.query.corpId?this.$route.query.corpId:cookies.get('corpId');
+    if(this.corpId)
+    {
+    cookies.set('corpId',this.corpId,{path:'/'},1/12);}
+    this.corpId=cookies.get('corpId')
+    },
+  watch:{
+      photoList:function(val,oval){//监听是否有正面票据
+        let self=this;
+            for(var i=0;i<val.length;i++){
+          if(val[i].picType=='front')
+          {
+            self.hasFront=true
+             break;
+            
+           
+          }
+          else{
+           self.hasFront=false
+          }
+        }
+      }
   },
   methods:{
-  getUserId(oj){
-    let self=this;
-    this.$http.post('/dingtalk/open/user/add/save',oj).then(res=>{
-         self.userId= res.data.data;
- 
-    }).then(res=>{
-          self.$http.get('/dingtalk/user/view/'+self.userId).then(rw=>{
-          self.userName=rw.data.data.userName;
-          self.avatorUrl=rw.data.data.userAvatar;
-         })
-    })
-   },
    closeDialog(done){
 　　done();
+this.photoList=[];
    },
-    getOauth(){
-      let self=this; 
-    var body={
-           corpId: self.corpId,
-           url:window.location.href//当前主机地址
-         }
-       this.$http.post('/dingtalk/open/get/singnature',body)
-       .then(res=>{
-         DingTalkPC.config({
-         agentId:res.data.data.agentId,
-         timeStamp:res.data.data.timeStamp,
-         nonceStr:res.data.data.nonceStr,
-         signature:res.data.data.singnature,
-         corpId:res.data.data.corpId,
-         jsApiList:['device.notification.alert', 'device.notification.confirm','biz.util.open']
-          }); 
-        }).then(function(){
-            authCode(function(ress){
-         self.getUserId({code:ress.code,corpId:self.corpId});
-          },self.corpId)    
-        });
-    },
+   renderCookies(name){
+     return cookies.get(name)
+   },
     handleCommand(command){
       let self=this;
       if(command=='a'){
@@ -204,77 +175,107 @@ export default {
 
       }
     },
+
       dataURLtoBlob(dataurl) {
-        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+         var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
             bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
         while (n--) {
             u8arr[n] = bstr.charCodeAt(n);
         }
         return new Blob([u8arr], { type: mime});
     },
-    setPic(e,type){
-      let self=this;
+    delPic(e){
+       this.photoList=arrRemove(this.photoList,'',e,1)
+    },
+      setPic(e,type){
+        let self=this;
+        if(self.photoList.length>=10){
+               self.$notify({
+          title: '警告',
+          message: '最多识别十张图片',
+          type: 'warning'
+        });
+        }
+        else{
+      if(type==0){
+        type='front'
+      }
+      else{
+        type='back'
+      }
        let config = {
               headers: {
                 'Content-Type': 'multipart/form-data'
               }
             };
      var fd=new FormData();
-      if(type==1){
-        var file=self.$refs.pics.files[0];
-        fd.append('images', file);
+      if(type=='back'){
+      var file= this.$refs.pics.files[0];
+      if(!imgCheck(file).flag){
+        self.$notify({
+          title: '警告',
+          message: imgCheck(file).error,
+          type: 'warning'
+        });
+      }else{
+        fd.append('images',file);
         self.$http.post('/dingtalk/bill/upload/list',fd,config).then(res=>{
            if(res.data.code=='000000'){
-            self.backUrl=res.data.data.urlList[0];
             self.hostUrl=res.data.data.hostUrl;
+             self.photoList.push({picType:type,picUrl:res.data.data.urlList[0]});
            }
       })
+      }
       }
       else{
-        self.showLoading=true;
-             var file=self.$refs.picss.files[0];
-             fd.append('images', file);
-           self.$http.post('/dingtalk/bill/upload/list',fd,config).then(res=>{
+     var file= this.$refs.pic.files[0];
+      if(!imgCheck(file).flag){
+            self.$notify({
+          title: '警告',
+          message: imgCheck(file).error,
+          type: 'warning'
+        });
+         }else{
+        fd.append('images',file);
+        self.$http.post('/dingtalk/bill/upload/list',fd,config).then(res=>{
            if(res.data.code=='000000'){
-            self.showLoading=false;
-            self.frontUrl=res.data.data.urlList[0];
+            self.hasFront=true;
+            self.imgLoading=false;
+            self.$refs.pic.files[0]=null;
             self.hostUrl=res.data.data.hostUrl;
+             self.photoList.push({picType:type,picUrl:res.data.data.urlList[0]});
            }
       })
+    }
       }
+    }
       
     },
     cancelUpload(){
-      this.backUrl='';
-      this.frontUrl='';
+      this.photoList=[];
+      this.hasFront=false;
       this.dialogVisible=false;
     },
     confirmUpload(){
       let self=this;
-      var photoList=[];
-         if(this.backUrl!='')
-         {
-          photoList.push({picType:'front',picUrl:self.backUrl});
-         }
-         if(this.frontUrl!=''){
-          photoList.push({picType:'back',picUrl:self.frontUrl});
-         }
+      if(self.photoList.length!=0)
+      {
          var data={
-          photoList:photoList,
+          photoList:self.photoList,
           dataSource:'dingtalkPC',
           ocr:true
          }
          this.$http.post('/dingtalk/bill/add/save',data).then(res=>{
-          // console.log(res);
               if(res.data.code=='000000'){
                 self.$message({
                   showClose: true,
                    message: '上传成功',
                      type: 'success'
                 });
-                  self.backUrl='';
-                 self.frontUrl='';
+                 self.photoList=[];
+                this.hasFront=false;
                 self.dialogVisible=false;
+                self.$router.push({path:'/paperTicks',query:{id:res.data.data.id,version:1}})
               }
               else{
                   self.$message({
@@ -285,6 +286,10 @@ export default {
 
               }
          })
+       }
+       else{
+           self.dialogVisible=false;
+       }
     }
  
   }
@@ -294,7 +299,7 @@ export default {
 <style>
 @import '../node_modules/bootstrap/dist/css/bootstrap.css';
 @import '../src/assets/eui/lib/theme-default/index.css';
- @import '../node_modules/font-awesome/css/font-awesome.css';
+@import '../node_modules/font-awesome/css/font-awesome.css';
 
 #app {
   font-family: 'Microsoft Yahei', Helvetica, Arial, sans-serif;
@@ -360,8 +365,38 @@ border:dashed 1px #3497ff;
   padding:0px;
   top:0px;
 }
+.btn_del{
+  position: relative;
+  left:46%;
+  top: -24px;
+  border-radius: 0px;
+  width:8%;
+  cursor:pointer;
+}
 .codeImg{
   width:100%;height:auto;
 }
+  .pic_item{
+    width:100%;
+    height:150px;
 
+  }
+  .user_tabs{
+    list-style: none;
+   width:400px;
+   height:50px;
+   padding-top: 10px;
+   float:right;
+   padding-right: 10px
+
+  }
+  .user_tabs li{
+    float: left;
+    width:33%;
+    height:40px;
+    text-align: center;
+       padding: 0px;
+       margin: 0px;
+       line-height: 30px
+  }
 </style>

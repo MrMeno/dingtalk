@@ -1,0 +1,89 @@
+import Vue from 'vue'
+import Router from 'vue-router'
+import Hello from '@/components/Hello'
+import main from '@/page/main.vue'
+import tickIndex from '@/page/ticks/tickIndex.vue'
+import searchTicks from '@/page/ticks/searchTicks.vue'
+import addTicks from '@/page/ticks/addTicks.vue'
+import editTicks from '@/page/ticks/editTicks.vue'
+import editPaperTicks from '@/page/ticks/editPaperTicks.vue'
+import elecTicks from '@/page/ticks/elecTicks.vue'
+import paperTicks from '@/page/ticks/paperTicks.vue'
+import bankSearch from '@/page/tools/bankSearch.vue'
+import indexTool from '@/page/tools/indexTool.vue'
+import broadPush from '@/page/tools/broadPush.vue'
+import dateLink from '@/page/tools/dateLink.vue'
+import cacul from '@/page/tools/cacul.vue'
+import pre from '@/page/pre.vue'
+
+
+Vue.use(Router);
+export function createRouter(){
+return new Router({
+  routes: [
+    {
+      path: '/',
+      component:pre
+    },
+    {
+     path:'/pre',
+     component:pre
+    },
+    {
+      path:'/main',
+      component:main
+    },
+    {
+      path:'/ticks',
+      component:tickIndex,
+      children:[{
+        path:'',
+        component:searchTicks
+      }]
+    },
+     {
+      path:'/addTicks',
+      component:addTicks
+    },
+     {
+      path:'/elecTicks',
+      component:elecTicks
+    },
+    {
+      path:'/paperTicks',
+      component:paperTicks
+    },
+     {
+      path:'/editPaperTicks',
+      component:editPaperTicks
+    },
+      {
+      path:'/editTicks',
+      component:editTicks
+    },
+    {
+      path:'/tools',
+      component:indexTool,
+      children:[{
+        path:'',
+        component:bankSearch
+      },
+      {
+       path:'/tools/bank',
+       component:bankSearch
+      },{
+        path:'/tools/broad',
+       component:broadPush
+      },{
+        path:'/tools/dateLink',
+       component:dateLink
+      },{
+        path:'/tools/cacul',
+       component:cacul
+      }
+      ]
+    }
+  ]
+})
+}
+

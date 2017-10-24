@@ -1,0 +1,380 @@
+<template>
+	<div class='container-fluid' style='height:100%'>
+		<div class="row" style='height:100%'>
+      <div class="col col-md-12 col-sm-12 text-left">
+        
+			        <div class="row" style='padding-top:10px'>
+                <div class="col col-md-12 col-sm-12 text-left" style='padding:0px'>
+                    工具><span style='color:#999;font-size:12px'>贴现计算</span>
+                </div>
+              </div>
+
+              <div class="row" style='background-color:white;min-height:700px' :style="{height:rowHeight-175+'px'}">
+              	<div class="col col-md-12 col-sm-12">
+              		<div class="row" style='line-height:30px;padding-top:30px'>
+              			<div class="col col-md-7 col-sm-7 col-md-offset-3 col-sm-offset-3">
+              				<div class="row" style='padding:8px'>
+              					<div class="col col-md-3 col-sm-3 text-right">
+              						票面金额（万元）：
+              					</div>
+              					<div class="col col-md-7 col-sm-7 text-left">
+              						<el-input type='number' @change='numCheck' v-model.number="amouts" :autofocus="true" placeholder="请输入票面金额"></el-input>
+              					</div>
+              					<div class="col col-md-2 col-sm-2 text-left">
+              						
+              					</div>
+              				</div>
+              				<div class="row" style='padding:8px'>
+              					<div class="col col-md-3 col-sm-3 text-right">
+              						贴现日：
+              					</div>
+              					<div class="col col-md-7 col-sm-7 text-left">
+              						  <el-date-picker  v-model="tsDate" style='width:100%' type="date"  placeholder="请选择贴现日" format="yyyy-MM-dd 周ddd"></el-date-picker>
+              					</div>
+              					<div class="col col-md-2 col-sm-2 text-left">
+              					
+              					</div>
+              				</div>
+              				<div class="row" style='padding:8px'>
+              					<div class="col col-md-3 col-sm-3 text-right">
+              						到期日：
+              					</div>
+              					<div class="col col-md-4 col-sm-4 text-left">
+              						 <el-date-picker  v-model="dqDate" format="yyyy-MM-dd 周ddd" style='width:100%' type="date"  placeholder="请选择到期日" @change='getResult()'></el-date-picker>
+              					</div>
+              					<div class="col col-md-3 col-sm-3 text-left">
+              						<el-button-group style='width:90%'>
+                                      <el-button size="small" :plain="ishYear" type="primary" style='width:50%' @click='changeYear(1)'>一年</el-button>
+                                       <el-button  size="small" :plain="!ishYear" type="primary" style='width:50%' @click='changeYear(0)'>半年</el-button>
+                                    </el-button-group>
+              					</div>
+              				</div>
+              				<div class="row" style='padding:8px'>
+              					<div class="col col-md-3 col-sm-3 text-right">
+              						调整天数：
+              					</div>
+              					 <div class="col col-md-7 col-sm-7 text-left" v-if='!ishYear'>
+            						<el-input-number v-model.number='days' style='width:100%' :min='0' :controls='false' :max='15' @change='changeState' placeholder="请输入调整天数">
+                                 
+                          </el-input-number> 
+              					  </div> 
+                          <div class="col col-md-4 col-sm-4 text-left" v-if='ishYear'>
+              						<el-input-number v-model.number='days' :min='0' :controls='false' :max='15'  @change='changeState' placeholder="请输入调整天数" style='width:100%'></el-input-number>
+              					</div>
+
+              					<div class="col col-md-3 col-sm-3 text-left" v-if='ishYear'>
+              						 <el-checkbox v-model="checked" @change="isDiff">异地加三天</el-checkbox>
+              					</div>
+              				</div>
+              				<div class="row" style='padding:8px'>
+              					<div class="col col-md-3 col-sm-3 text-right">
+              						月利率（‰）：
+              					</div>
+              					<div class="col col-md-7 col-sm-7 text-left">
+              						<el-input type='number' v-model.number='monthsBeni' placeholder="请输入月利率" @change='monthBnft()'></el-input>
+              					</div>
+
+              					<div class="col col-md-2 col-sm-2 text-left">
+              						
+              					</div>
+              				</div>
+              				<div class="row" style='padding:8px'>
+              					<div class="col col-md-3 col-sm-3 text-right">
+              						年利率（%）：
+              					</div>
+              					<div class="col col-md-7 col-sm-7 text-left">
+              						<el-input type='number' v-model.number='yearBeni' placeholder="请输入年利率" @change='yearBnft()'></el-input>
+              					</div>
+              					<div class="col col-md-2 col-sm-2 text-left">
+              						              					</div>
+              				</div>
+              				<div class="row" style='padding:8px'>
+              					<div class="col col-md-3 col-sm-3 text-right">
+              						扣息（元/10万）：
+              					</div>
+              					<div class="col col-md-7 col-sm-7 text-left">
+              						<el-input type='number' v-model.number='beni' placeholder="请输入扣息"></el-input>
+              					</div>
+              					<div class="col col-md-2 col-sm-2 text-left">
+              						
+              					</div>
+              				</div>
+
+              					<div class="row" style='padding:8px'>
+              					<div class="col col-md-6 col-sm-6 text-right">
+              						<el-button @click='resets' >重置</el-button>
+              					</div>
+              					<div class="col col-md-6 col-sm-6 text-left">
+              						<el-button  type='primary' @click="calculate" :disabled="isAbled()">计算</el-button>
+              					</div>
+              				</div>
+              			</div>
+              		</div>
+
+              		<div class="row" style='padding:20px' v-if="hasRes">
+              			<div class="col col-md-12 col-sm-12">
+              				 <div class="row">
+              				 	<div class="col col-md-6 col-sm-6 col-md-offset-3 col-sm-offset-3">
+              				 		<div class="row" style='padding:10px'>
+              				 			<div class="col col-md-3 col-sm-3 text-right">
+              				 				计息天数
+              				 			</div>
+              				 			<div class="col col-md-6 col-sm-6">
+              				 		{{toatalDays}}天
+              				 			</div>
+              				 		</div>
+              				 		<div class="row" style='padding:10px'>
+              				 			<div class="col col-md-3 col-sm-3 text-right">
+              				 				每10万贴息
+              				 			</div>
+              				 			<div class="col col-md-6 col-sm-6">
+              				 				{{decimal(resultsBeni/amouts*10,2)}}元
+              				 			</div>
+              				 		</div>
+              				 		<div class="row" style='padding:10px'>
+              				 			<div class="col col-md-3 col-sm-3 text-right">
+              				 				应付利息
+              				 			</div>
+              				 			<div class="col col-md-6 col-sm-6">
+              				 				{{decimal(resultsBeni,2)}}元
+              				 			</div>
+              				 		</div>
+              				 		<div class="row" style='padding:10px'>
+              				 			<div class="col col-md-3 col-sm-3 text-right">
+              				 				实收金额
+              				 			</div>
+              				 			<div class="col col-md-6 col-sm-6">
+              				 				{{decimal(amouts*10000-resultsBeni,2)}}元
+              				 			</div>
+              				 		</div>
+
+              				 	</div>
+              				 </div>
+              			</div>
+              		</div>
+              	</div>
+              </div>
+          </div>
+		</div>		
+	</div>
+</template>
+<script>
+import {checkNum,checkOne,checkFloat,checkInit,check1To15} from '../../lib/util.js'
+	export default{
+		name:'broad',
+		data(){
+			return {
+				hasRes:false,//是否有查询结果
+					amouts:'',//票面金额
+					dqDate:'',//到期日
+					tsDate:'',//贴现日
+					monthsBeni:'',//月利率
+					yearBeni:'',//年利率
+					days:0,//调整天数
+          toatalDays:'',//剩余期限
+					beni:'',//手续费
+          adjustDays:0,//顺延天数
+					ishYear:true,//是否一年
+					checked:false,//异地加三天
+          resultsBeni:0,//每十万贴息
+          rowHeight:0
+
+					};
+		},
+		mounted(){
+       this.rowHeight=this.$parent.$data.height
+     this.tsDate=this.dateFormat(new Date());//贴现日默认今日
+     this.dqDate=this.addHalfYear(this.tsDate);//到期日默认半年后
+
+		},
+		methods:{
+				calculate(){//计算
+          let self=this;
+					this.hasRes=true;//是否计算过
+					checkNum(this.amouts);//是否是数字
+          if(this.days==''||!checkNum(self.days)){
+            this.days=0;
+          }  
+          this.toatalDays=parseInt(this.cutDate(this.tsDate,this.dqDate))+
+          parseInt(this.days)+parseInt(this.adjustDays);//计息天数
+           this.getBenni();//应付利息
+					},
+          numCheck(){
+            let self=this;
+             if(!checkFloat(self.amouts)){
+               self.amouts=(Math.floor(self.amouts*100000))/100000
+           }
+          },
+          checks(){
+            let self=this;
+            if(!checkNum(self.yearBeni)){
+              return {error:'年利率必须为数字',flag:false}
+            }
+            else if(!checkNum(self.monthsBeni)){
+              return {error:'月利率必须为数字',flag:false}
+            }
+           else if(!checkNum(self.days)){
+              return {error:'调整天数必须为数字',flag:false}
+            }
+            else{
+              return {error:'',flag:true}
+            }
+
+          },
+				resets(){//表单重置
+					this.hasRes=false;
+					this.amouts='';
+					this.dqDate='';
+					this.tsDate='';
+          this.monthsBeni='';
+          this.yearBeni='';
+          this.days='';
+          this.beni='';
+          this.checked=false;
+				},
+        changeState(){
+          let self=this;
+          if(!checkNum(self.days)){
+            self.days=0;
+          }
+        this.checked=false;
+        },
+        getBenni(){
+         var t1=this.amouts*10000*this.monthsBeni/1000*this.toatalDays/30;
+         var t2=this.amouts*10000/100000*this.beni;
+           this.resultsBeni=t1+t2;
+        },
+				changeYear(type){//一年<=>半年
+					this.ishYear=!this.ishYear;
+          if(type==0){
+            this.dqDate=this.addHalfYear(this.tsDate);
+          }
+          else if(type==1){
+             this.dqDate=this.addOneYear(this.tsDate);
+          }
+				},
+       addHalfYear(data) {//当前日期加半年
+        var d2 = new Date(data);
+        d2.setMonth(d2.getMonth() + 6);
+        d2.setDate(d2.getDate()); 
+        return this.dateFormat(d2)
+      },
+       addOneYear(data) {//当前日期加一年
+        var d2 = new Date(data);
+        d2.setFullYear(d2.getFullYear() + 1);
+        d2.setDate(d2.getDate()); 
+        return this.dateFormat(d2)
+       },
+        cutDate(strDate1,strDate2) {//日期加减
+          strDate1=new Date(strDate1)
+          strDate2=new Date(strDate2)
+        return Math.ceil((strDate2.getTime()-strDate1.getTime())/(24*60*60*1000));  
+      },
+       isDiff(){
+          if(this.checked==true){
+            this.days=3;
+          }
+          else{
+            this.days=0;
+          }
+       },
+        dateFormat(data) {//日期格式化
+        var fmt = "yyyy-MM-dd";
+        var o = {
+                "M+": data.getMonth() + 1, //月份 
+                "d+": data.getDate(), //日 
+                "h+": data.getHours(), //小时 
+                "m+": data.getMinutes(), //分 
+                "s+": data.getSeconds(), //秒 
+                "q+": Math.floor((data.getMonth() + 3) / 3), //季度 
+                "S": data.getMilliseconds() //毫秒 
+            };
+            if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (data.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+            return fmt;
+    },
+        getResult(){//获取顺延天数
+          let self=this;
+          var _dqDate='';var addDays=0;
+
+          if(typeof this.dqDate!='object')
+          { 
+            
+             _dqDate=this.dqDate;
+          }
+         else{
+          _dqDate=this.dateFormat(this.dqDate);
+         
+         }
+
+          if(this.checked){
+            addDays=3
+           }
+           this.$http.get('/dingtalk/tools/getDay?dueDate='+_dqDate+'&addDays='+addDays).then(res=>{        
+            if(res.data.code=='000000'){
+                    self.days=res.data.data.adjustDays;//调整天数
+                    self.adjustDays=res.data.data.delayDays;//顺延天数
+                    self.toatalDays=res.data.data.limitDays;//计息天数
+               }
+            else{
+               
+               }
+           })
+        },
+        tofixed(num,d){//数字，保留位数
+          var fixNum=new Number(num+1).toFixed(d);
+          var fixdNum=new Number(fixNum-1).toFixed(d);
+              return fixdNum
+        },
+        monthBnft(){//关联月/年利率  
+          let self=this;
+          this.yearBeni=this.tofixed(this.monthsBeni*12/10,6);
+          if(!checkFloat(this.monthsBeni)){
+               self.monthsBeni=(Math.floor(self.monthsBeni*100000))/100000
+          }
+        },
+         yearBnft(){//关联月/年利率
+          let self=this
+          this.monthsBeni=this.tofixed(this.yearBeni/12*10,6)
+                 if(!checkFloat(this.yearBeni)){
+               self.yearBeni=(Math.floor(self.yearBeni*100000))/100000
+          }
+        },
+         decimal(num,v){
+               var vv = Math.pow(10,v);
+             return Math.round(num*vv)/vv;
+            },
+        isAbled(){
+              var result=false;
+              var beniAble=(this.monthsBeni=='')&&(this.beni=='');//利息全为空true
+              var amountAble=(this.amouts=='');//总金额为空true
+              if(!amountAble){//总金额不为空
+                if(beniAble){//利率为空
+                  result=false;
+                }
+                else{//利率不为空
+                   result=true;
+                }
+              }
+              else{//总金额为空
+                result =false
+              }
+              return !result
+            }
+			}
+		}
+</script>
+<style>
+    .el-input__icon.el-icon-date{
+    position:absolute;
+    right:20px;
+  }
+  .el-input__icon.el-icon-close{
+       position:absolute;
+       right:20px;
+  }
+     .el-input__inner{
+    width:95%!important;
+  }
+</style>

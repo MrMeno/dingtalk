@@ -1,0 +1,76 @@
+<template>
+	<div class="contain-fluid">
+		
+	</div>
+</template>
+<script>
+import {authCode} from '@/lib/util';
+ import cookies from 'js-cookie';
+	export default{
+		name: 'pre',
+		data(){//签名校验页面
+        return{
+            corpId:cookies.get('corpId'),
+            userName:'',
+            userId:'',
+            avatorUrl:'',
+            corpName:'',
+            maxHeight:''
+         }
+		},
+		created(){
+this.maxHeight=window.screen.availHeight;
+			console.log(this.corpId)
+		},
+		mounted(){
+			
+			this.getOauth();
+		},
+		methods:{
+        getUserId(oj){
+        let self=this;
+         this.$http.post('/dingtalk/open/user/add/save',oj).then(res=>{
+         self.userId= res.data.data;
+        }).then(res=>{
+          self.$http.get('/dingtalk/user/view/'+self.userId).then(rw=>{
+          	console.log(rw)
+          self.userName=rw.data.data.userName;
+          self.avatorUrl=rw.data.data.userAvatar;
+          self.corpName=rw.data.data.corpName;
+            cookies.set('userName',self.userName,{path:'/'},1/12)
+			   cookies.set('avatorUrl',self.avatorUrl,{path:'/'},1/12)
+        cookies.set('corpName',self.corpName,{path:'/'},1/12)
+         })
+       })
+       },
+       getOauth(){
+      let self=this; 
+        var body={
+           corpId: self.corpId,
+           url:window.location.href//当前主机地址
+         }
+         console.log(body)
+        this.$http.post('/dingtalk/open/get/singnature',body)
+        .then(res=>{
+         DingTalkPC.config({
+         agentId:res.data.data.agentId,
+         timeStamp:res.data.data.timeStamp,
+         nonceStr:res.data.data.nonceStr,
+         signature:res.data.data.singnature,
+         corpId:res.data.data.corpId,
+         jsApiList:['device.notification.alert', 'device.notification.confirm','biz.util.open']
+          }); 
+        }).then(function(){
+            authCode(function(ress){
+         self.getUserId({code:ress.code,corpId:self.corpId});
+          },self.corpId)    
+        }).then(function(){
+        	setTimeout(function(){
+        		self.$router.push({path:'/main'});
+        	},500)
+        	
+        });
+    }
+		}
+	}
+</script>

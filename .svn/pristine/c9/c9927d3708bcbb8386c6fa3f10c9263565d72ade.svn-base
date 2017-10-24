@@ -1,0 +1,768 @@
+<template>
+		<div class='container-fluid' style='line-height:30px;padding-bottom:20px'>
+
+		<div class="row">
+			<div class="col col-md-12 col-sm-12 text-center">
+         <div class="row" style='padding:10px'>
+                <div class="col col-md-12 col-sm-12 text-left" style='padding:0px'>
+                    票据><span style='color:#999;font-size:12px'>{{data.billNo}}</span>
+                </div>
+              </div>
+
+    
+			</div>
+		</div>
+		<div class="row" style='background-color:white'>
+			<div class="col col-md-12 col-sm-12 text-center">
+
+               <div class="row" style='padding:10px' v-if='photoList_1&&photoList_1.length!=0'>
+          <div class="col col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
+                        <el-carousel  arrow="always" :autoplay='false' @change='getItem' >
+                         <el-carousel-item v-for="(item,index) in photoList_1" @change='getItem' :key="index" :label="item.picType=='front'?'正面':'背面'">
+                        
+                                 <img v-bind:src="hostUrl+item.picUrl" alt="" @click="clickImg()">
+                                    <span class='tipss'>{{index+1+'/'+photoList_1.length}}<br></span>
+                              </el-carousel-item>
+                           </el-carousel>
+          </div>
+          <div class="col col-md-3 col-sm-3">
+            <div class="row" style='padding-top:0px'>
+              <div class="col col-md-6 col-sm-6 text-right">
+                <el-button type='text' icon="edit" @click="editPic">编辑票面</el-button>
+              </div>
+              <div class="col col-md-6 col-sm-6 text-left">
+                <el-button type='text' style='color:red' icon="delete" @click="delPic('x')">删除图片</el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row"  v-else>
+          <div class="col col-md-6 col-sm-6 col-md-offset-6 col-sm-offset-6 text-right">
+              <el-button type='text' icon="edit" @click="dialogVisible=true" style='padding-top:10px'>添加图片</el-button>
+          </div>
+        </div>
+
+				<div class="row" style='padding:30px;color:#5c5c5c'>
+					<div class="col col-md-12 col-sm-12" style='background-color:#f5f7fb'>
+						<div class="row" style='padding:10px'>
+							<div class="col col-md-3 col-sm-3 text-center">
+								  <el-select v-model="data.billClassify" placeholder="请选择" disabled>
+                                    <el-option   v-for="item in tickTypeList"  :key="item.value"  :label="item.label"      :value="item.value"></el-option> 
+                                   </el-select>
+							  </div>
+
+							<div class="col col-md-6 col-sm-6 text-center">
+								<h3 style='border-bottom:solid 2px #b9c2d2'>
+									<span style='display:block;padding:20px'>电子{{data.billClassify=='1'?'银行':'商业'}}承兑汇票</span>
+								</h3>
+							</div>
+						</div>
+
+						<div class="row" style='padding:10px'>
+	           <div class="col col-md-4 col-sm-4 text-left" style='word-break:keep-all;'>
+                票号：<el-input v-model='data.billNo' style='width:85%' :maxlength='30'></el-input>
+              </div>
+                <div class="col col-md-3 col-sm-3 text-left">
+                  出票日： <el-date-picker  v-model="data.draftDate" format='yyyy-MM-dd' style='width:60%' type="date" placeholder="选择日期" :picker-options="pickerOptions0"> </el-date-picker>
+                             </div>
+              <div class="col col-md-3 col-sm-3 text-left">
+                到期日： <el-date-picker   v-model="data.dueDate" format='yyyy-MM-dd' style='width:60%'  type="date" placeholder="选择日期" @change='getLimitDays'> </el-date-picker>
+                             </div>
+                             <div class="col col-md-2 col-sm-2 text-right">
+                状态：<el-select v-model="data.billStatus" placeholder="请选择"style='width:65%'>
+                                    <el-option   v-for="item in statusList"  :key="item.value"  :label="item.label"      :value="item.value"></el-option> 
+                       </el-select>
+                </div>
+						</div>
+
+						<div class="row" style='padding:10px'>
+						 <div class="col col-md-2 col-sm-2 text-left" style='word-break:keep-all;padding-top:5px'>
+               剩余期限：{{Number(data.limitDays)==0?'已到期':Number(data.limitDays)+'天'}}</el-input>
+              </div>
+
+							 <div class="col col-md-5 col-sm-5 text-left" style='word-break:keep-all;' >
+              调整：<el-input v-model='data.adjustDays' @focus='getAdjust' @blur='changeAdjust' style='width:12%;padding:3px'></el-input>天<span>
+                （节假日顺延{{data.delayDays}}天）
+              </span>
+              </div>
+
+                             <div class="col col-md-5 col-sm-5 text-right">
+                来源： <el-select v-model="data.billSource" placeholder="请选择" style='width:26%' >
+                         <el-option   v-for="item in sourceList"  :key="item.value"  :label="item.label" :value="item.value"></el-option> 
+                     </el-select>
+              </div>
+						</div>
+
+						<div class="row" style='padding:20px;'>
+                            <table class='billTable'>
+                            	<tr>
+                            		<td rowspan='3' style='width:2%;padding:10px'><p>出</p><p>票</p><p>人</p></td>
+                            		<td style='width:15%'>全称</td>
+                            		<td colspan='2' style='width:33%'>
+                            			<el-input v-model='data.drawerName'></el-input>
+                            		</td>
+                            		<td rowspan='3' style='width:2%;padding:10px'><p>收</p><p>款</p><p>人</p></td>
+                            		<td style='width:15%'>全称</td>
+                            		<td style='width:33%'>
+                            			<el-input v-model='data.payeeName'></el-input>
+                            		</td>
+                            	</tr>
+                            	<tr>
+                            		<td>账号</td>
+                            		<td colspan='2'><el-input v-model='data.drawerAcct'></el-input></td>
+                            		<td>账号</td>
+                            		<td><el-input v-model='data.payeeAcct'></el-input></td>
+                            	</tr>
+                            	<tr>
+                            		<td>开户银行</td>
+                            		<td colspan='2'>	<el-input v-model='data.drawerBank'></el-input></td>
+                            		<td>开户银行</td>
+                            		<td>	<el-input v-model='data.payeeBank'></el-input></td>
+                            	</tr>
+                            	<tr>
+                            		<td colspan='2' style='padding:10px 0px'>出票金额</td>
+                            		<td colspan='4'>{{convertCurrencys(data.billAmount)}}</td>
+                            		<td>	<el-input v-model='data.billAmount'></el-input></td>
+                            	</tr>
+                            	<tr>
+                            		<td rowspan='2' style='padding:10px'><p>承</p><p>兑</p><p>人</p></td>
+                            		<td>全称</td>
+                            		<td>	<el-input v-model='data.acceptorName'></el-input></td>
+                            		<td colspan='2' style='width:10%'>
+                            			 <el-select v-model="data.acceptorType" v-if="data.billClassify=='1'" placeholder="请选择">
+                                    <el-option   v-for="item in acceptorTypeList"  :key="item.value"  :label="item.label"    :value="item.value"></el-option> 
+                                   </el-select>
+                                   <span v-else>
+                                     企业
+                                   </span>
+                            		</td>
+                            		<td>开户行行号</td>
+                            		<td>	<el-input v-model='data.acceptorBankNo'></el-input></td>
+                            	</tr>
+                            	<tr>
+                            		<td>账号</td>
+                            		<td colspan='3'>	<el-input v-model='data.acceptorAcct'></el-input></td>
+                            		<td>开户行名称</td>
+                            		<td>	<el-input v-model='data.acceptorBank'></el-input></td>
+                            	</tr>
+                            </table>
+                  
+						</div>
+
+					</div>
+				</div>
+				<div class="row" style='padding:30px 0px'>
+					<div class="col col-md-6 col-sm-6 text-right">
+						<el-button :plain='true' @click='cancel'>取消</el-button>
+					</div>
+					<div class="col col-md-6 col-sm-6 text-left">
+						<el-button type='primary' @click='save'>保存</el-button>
+					</div>
+				</div>
+           <div class="row">
+              <div class="col col-md-12 col-sm-12">
+                <el-dialog title="编辑图片" size='small' :visible.sync="dialogVisible">
+                 <el-row :gutter='20'>
+                   <el-col :span='12' v-for='(items,index) in photoList' style='padding:0px 20px'>
+                     <img :src="hostUrl+items.picUrl" alt="" class='pic_item'>
+                        <img src="../../assets/del.png" alt="" class='btn_del' @click='delPic(index)'>
+                     <p>{{items.picType=='back'?'票据背面':'票据正面'}}</p>
+                   </el-col>
+                    <el-col :span='12' style='padding:20px'  v-if='!hasFront'>
+                        <div class="pic_tab" v-loading='isPicLoading'>
+                             <input type="file" accept="image/*" class='file'
+                              @change='setPic($event,0)' ref='pic'>
+                              <p style='color:#ddd;font-size:20px'>票据正面</p>
+                           </div>
+                   </el-col>
+                   <el-col :span='12' style='padding:20px'>
+                        <div class="pic_tab"  v-loading='isPicLoading'>
+                             <input type="file" accept="image/*" class='file'
+                              @change='setPic($event,1)' ref='pics'>
+                               <p style='color:#ddd;font-size:20px'>票据背面</p>
+                           </div>
+                   </el-col>
+                 </el-row>
+              <div class="row">
+                <div class="col col-md-12 col-sm-12">
+                  <p style='color:#a9abaf'>请上传格式为pdf、jpg、png、bmp格式，大于4KB小于4M的图片</p>
+                    <p style='color:#a9abaf'>预计处理时长为30-60秒，工作日：9:00~18:00</p>
+                </div>
+              </div>
+
+              <div class="row" style='padding-top:50px'>
+                <div class="col col-md-6 col-sm-6 text-right">
+                  <el-button :plain="true" @click='cancelUpload'>取消</el-button>
+                </div>
+                <div class="col col-md-6 col-sm-6 text-left">
+                   <el-button type='primary' @click='confirmUpload'>确认</el-button>
+
+                </div>
+              </div>
+          </el-dialog>
+          </div>
+        </div>
+			</div>
+		</div>
+       <big-img v-if="showImg" @clickit="viewImg" :imgSrc="imgSrc"></big-img>
+	</div>
+</template>
+<script>
+import {convertCurrency,checkOne} from '../../lib/util.js';
+import {dateFormat} from '../../lib/tools.js'
+import {checkEmpty,checkNum ,jianDate,checkMoney,imgCheck,getNowFormatDate,CompareDate,arrRemove} from'../../lib/tools.js'
+import bigImg from '../../components/BigImg'
+	export default{
+       data(){
+       	return{
+       		id:'',
+       		version:'',
+       		data:[],
+       		tickTypeList:[],
+            tickType:'',
+            statusList:[],
+            sourceList:[],
+            acceptorTypeList:[],
+            hostUrl:'',
+            dialogVisible:false,
+            photoList:[],//编辑中的图片数据
+            photoList_1:[],
+            hasFront:false,
+            uploadType:1,//上传图片类型0：正面1：背面
+            picIndex:0,//当前轮播图片index
+            showImg:false,
+            imgSrc:'',
+              isPicLoading:false,
+            adjustDays_1:0,
+            firstLoad:true,
+             pickerOptions0:{
+             disabledDate(time) {
+            return time.getTime()>Date.now();
+          }
+        },
+         pickerOptions1:{
+             disabledDate(time) {
+            return time.getTime()<=Date.now();
+          }
+        }
+       	}
+       },
+       watch:{
+          photoList:function(val,oval){//监听是否有正面票据
+        let self=this;
+            for(var i=0;i<val.length;i++){
+          if(val[i].picType=='front')
+          {
+            self.hasFront=true
+             break;       
+          }
+          else{
+           self.hasFront=false
+          }
+        }
+      }
+       },
+       components:{
+       bigImg
+       },
+       methods:{
+              formatData(data){
+          let self=this;
+            var f_data={
+            billSource:data.billSource||'',//票据来源
+            billStatus:data.billStatus||'',//票据状态
+            dataSource:'dingtalkPC',//数据来源
+            billClassify:data.billClassify||'',//票据类型
+            billNo:data.billNo||'',//票号
+            draftDate:data.draftDate||'',//出票日
+            dueDate:data.dueDate||'',//到期日
+            limitDays:data.limitDays||0,//剩余期限
+            billAmount:data.billAmount||0,//票面金额
+            billAmountUpper:convertCurrency(data.billAmount||0),//大写金额
+            adjustDays:data.adjustDays||0,//调整天数
+            delayDays:data.delayDays||0,//顺延天数
+            drawerName:data.drawerName||'',//出票人全称
+            drawerAcct:data.drawerAcct||'',//出票人账号
+            drawerBank:data.drawerBank||'',//出票人开户行
+             hostUrl:data.hostUrl||'',
+            payeeName:data.payeeName||'',//收款人全称
+            payeeAcct:data.payeeAcct||'',//收款人账号
+            payeeBank:data.payeeBank||'',//收款人开户行
+            acceptorName:data.acceptorName||'',//承兑人名称
+            acceptorAcct:data.acceptorAcct||'',//承兑人账号
+            acceptorBank:data.acceptorBank||'',//承兑人开户行
+            acceptorBankNo:data.acceptorBankNo||'',//承兑人开户行号
+            acceptorBankAddr:data.acceptorBankAddr||'',//承兑人开户行地址
+            acceptorType:data.acceptorType||'',//承兑人类型
+            contractNo:data.contractNo||'',//承兑协议编号/交易合同号
+            photoList:data.photoList||'',//图片 picType picUrl
+            ocr:data.ocr||false//是否ocr
+          }; 
+          return f_data
+        },
+       clickImg(){
+          let self=this;
+         this.showImg = true;
+            this.imgSrc =self.hostUrl+self.data.photoList[self.picIndex].picUrl;
+            },
+            viewImg(){
+                this.showImg = false;
+            },
+       	getData(){
+       		let self=this;
+       		this.$http.get('/dingtalk/bill/edit/init/'+this.version+'/'+this.id)
+       		.then(res=>{
+                 if(res.data.code=='000000'){
+
+                     self.data=res.data.data.page;
+                     console.log(self.data);
+                     self.data=self.formatData(self.data);
+                     self.photoList_1=res.data.data.page.photoList||[];
+                     self.photoList=res.data.data.page.photoList||[];
+                     self.hostUrl=self.data.hostUrl;
+                     self.statusList=res.data.data.billStatus.map(function(item){
+                     	return {label:item.dictValue,value:item.dictKey}
+                     })
+                        self.sourceList=res.data.data.billSource.map(function(item){
+                     	return {label:item.dictValue,value:item.dictKey}
+                     })
+                         self.acceptorTypeList=res.data.data.acceptorType.map(function(item){
+                     	return {label:item.dictValue,value:item.dictKey}
+                     })
+                          self.acceptorTypeList.pop(self.acceptorTypeList.length-1)
+                          self.tickTypeList=res.data.data.billClassify.map(function(item){
+                      return {label:item.dictValue,value:item.dictKey}
+                     })
+                 }
+       		})
+       	},
+
+         confirmUpload(){//确认上传
+       let self=this;
+        this.photoList_1=[];//确认上传之后更新数组2，数组2为视图数组
+      for(var i=0;i<this.photoList.length;i++)
+        {self.photoList_1[i]=self.photoList[i]}
+            this.dialogVisible=false;
+            this.isPicLoading=false
+    },
+     cancelUpload(){//取消上传
+      let self=this;
+      this.photoList=[];//取消上传之后，视图数组不变，上传数组不变
+      for(var i=0;i<this.photoList_1.length;i++)
+        {self.photoList[i]=self.photoList_1[i]}
+        this.dialogVisible=false; 
+    },
+
+   editPic(){
+         this.dialogVisible=true;
+        },
+    delPic(e){
+        let self=this;
+        if(e=='x'){//侧边删除视图数组,此时需要更新上传数组
+           var sarr=arrRemove(self.photoList_1,'',self.picIndex,1);
+           self.photoList_1=[];
+           for(var i=0;i<sarr.length;i++){
+            self.$set(self.photoList_1,i,sarr[i])
+           }
+           self.photoList=self.photoList_1
+         }
+          else{//弹出框中删除上传数组
+            self.photoList=arrRemove(self.photoList,'',e,1)
+             // self.photoList=arr;
+          }
+     },
+    setPic(e,type){
+      if(type==0){type='front'}else{type='back'}//判断正背面
+      let self=this;
+     self.isPicLoading=true
+      let config = {headers: {'Content-Type': 'multipart/form-data'}};
+     var fd=new FormData();
+      if(type=='back'){//背面数据
+      var file= this.$refs.pics.files[0]||undefined;
+        if(!imgCheck(file).flag){//图片校验
+             self.$notify({
+          title: '警告',
+          message: imgCheck(file).error,
+          type: 'warning'
+        });
+             self.isPicLoading=false
+      }else{//通过
+        fd.append('images',file);
+        self.$http.post('/dingtalk/bill/upload/list',fd,config).then(res=>{
+           if(res.data.code=='000000'){
+            self.hostUrl=res.data.data.hostUrl;
+             self.photoList.push({picType:type,picUrl:res.data.data.urlList[0]});//成功之后更新数组1，确认上传之后更新数组2
+             self.isPicLoading=false
+           }
+      })
+      }
+      }
+      else{//正面数据
+     var file= this.$refs.pic.files[0]||undefined;
+          if(!imgCheck(file).flag){
+             self.$notify({
+          title: '警告',
+          message: imgCheck(file).error,
+          type: 'warning'
+        });
+              self.isPicLoading=false
+      }else{
+        fd.append('images',file);
+        self.$http.post('/dingtalk/bill/upload/list',fd,config).then(res=>{
+           if(res.data.code=='000000'){
+            self.hostUrl=res.data.data.hostUrl;
+             self.photoList.push({picType:type,picUrl:res.data.data.urlList[0]});
+             self.isPicLoading=false
+           }
+      })
+      }
+    }  
+    },
+
+       getItem(val,oldVal){
+            this.picIndex=val;
+        },
+
+            changeAdjust(){
+          let self=this;
+          if(checkNum(this.data.adjustDays).flag){
+            var myDate = new Date();
+            var str1=getNowFormatDate();//当前时间
+            var ss=jianDate(str1,self.data.dueDate);
+            if(ss)
+            {
+          if(self.data.adjustDays!=self.adjustDays_1){
+            if(ss<0){
+              self.data.limitDays=0
+            }  
+            else{
+              self.data.limitDays=Number(ss)+Number(self.data.adjustDays);
+            }
+          }
+          }
+          else{
+             self.data.limitDays=0
+          }
+        }
+        },
+          CompareDates(d1,d2){
+    return CompareDate(d1,d2)
+    },
+        getAdjust(){
+          this.adjustDays_1=this.data.adjustDays;
+        },
+       getLimitDays(){//获取剩余期限
+          let self=this;
+         if(!checkEmpty(self.data.dueDate)){
+               if(typeof self.data.dueDate =='object'){
+                self.data.dueDate=dateFormat(self.data.dueDate);
+               }
+           var addDays=0;
+            if(self.data.billClassify=='1'||self.data.billClassify=='2'){
+            addDays=0;
+            }
+           else{
+            addDays=3;
+           }
+           if(self.CompareDates(self.data.dueDate,getNowFormatDate()))//判断是否到期日大于今天
+          {
+          this.$http.get('/dingtalk/tools/getDay?dueDate='+self.data.dueDate+'&addDays='+addDays).then(res=>{//获取顺延日期
+            if(res.data.code=="000000"){
+              if(!self.firstLoad){
+                 self.data.adjustDays=res.data.data.adjustDays;//调整天数
+                 self.data.limitDays=res.data.data.limitDays;//顺延天数
+                  }
+
+                  self.firstLoad=false               
+                    
+                    self.data.delayDays=res.data.data.delayDays;//计息天数
+            }
+            else{
+               this.$alert("网络异常")
+               }
+           })
+      }
+      else{
+           self.data.limitDays=0;//顺延天数
+          self.data.delayDays=0;//计息天数
+      }
+         }
+         else{
+                    self.data.adjustDays=0;//调整天数
+                    self.data.limitDays=0;//顺延天数
+                    self.data.delayDays=0;//计息天数
+
+         }
+
+        },
+
+        getItem(val,oldVal){
+            this.picIndex=val;
+        },
+       valFormData ( data ) {
+        let self=this;
+            let vRes = {flag: true}, tip = '';
+              var isPaper=false;
+            if(data.billClassify=='3'||data.billClassify=='4')
+            {
+               isPaper= true
+            }
+          
+            console.log(isPaper)
+            // 票据来源
+            if(checkEmpty(data.billSource) ){
+                return {flag: false, error: '请选择票据来源'}
+            }
+            // 票据状态
+            if(checkEmpty(data.billStatus)) {
+                return {flag: false, error: '请选择票据状态'}
+            }
+            // 票据类型
+            if(checkEmpty(data.billClassify) ) {
+                return {flag: false, error: '请选择票据类型'}
+            }
+            // 票号
+            if(!checkEmpty(data.billNo) ) {
+                let tmp = checkNum(data.billNo);
+                let len = isPaper ? 16 : 30;
+                if (tmp.flag) {
+                    if (data.billNo.length != len) {
+                        return {flag: false, error: '票号应为' + len + '位'}
+                    }
+                } else {
+                    tmp.error = '票号' + tmp.error
+                    return tmp
+                }
+            } else {
+                return {flag: false, error: '票号必填'}
+            }
+            // 出票日
+            // if (checkEmpty(data.draftDate)) {
+            //     return {flag: false, error: '出票日必填'}
+            // }
+            // 到期日
+            if (checkEmpty(data.dueDate)) {
+                return {flag: false, error: '到期日必填'}
+            }
+
+            // 到期日大于出票日
+            if(data.draftDate!=''){
+            if (jianDate(data.draftDate, data.dueDate) < 0 ) {
+                return {flag: false, error: '到期日必须大于出票日'}
+            }
+          }
+
+            // 调整天数
+            if (!checkEmpty(data.adjustDays, true)) {
+                if ( !checkNum(data.adjustDays).flag) {
+                    return {flag: false, error: '调整天数应为数字'}
+                }
+            } else {
+                return {flag: false, error: '调整天数必填'}
+            }
+            // 金额
+            if (!checkEmpty(data.billAmount)) {
+                let moneyTmp = checkMoney(data.billAmount, 2, 10)
+                if (!moneyTmp.flag) {
+                    moneyTmp.error = '金额' + moneyTmp.error
+                    return moneyTmp
+                }
+            } else {
+                return {flag: false, error: '金额必填'}
+            }
+
+                  if(data.payeeAcct!=''){
+            if (!checkNum(data.payeeAcct).flag) {
+                return {flag: false, error: '收款人账号应为数字'}
+            }
+          }
+
+             if(data.acceptorBankNo!=''){
+            if ( !(data.acceptorBankNo.length == 12 && checkNum(data.acceptorBankNo).flag)) {
+                tip = isPaper ? data.billClassify == '4' ? '付款人开户行行号': '付款行行号' : '承兑人开户行行号'
+                return {flag: false, error: tip + '应为12位数字'}
+            }
+            }
+            // 承兑人账号
+             if(data.acceptorAcct!=''){
+            if (!checkNum(data.acceptorAcct).flag) {
+                return {flag: false, error: '承兑人账号应为数字'}
+            }
+          }
+            
+            // 承兑行类别
+            if ( checkEmpty(data.acceptorType)) {
+              tip = isPaper ? (data.billClassify == '3' ? '付款行类型': '付款人类型') : '承兑人类型'
+                return {flag: false, error: tip+'必填'}
+            }
+          return vRes
+        },
+
+            convertCurrencys(num){
+          return convertCurrency(Number(num))
+        },
+       	cancel(){
+
+       		this.$router.push({path:'/ticks'})
+       	},
+       	save(){
+       		let self=this;
+
+             if(typeof self.data.dueDate =='object'){
+                this.data.dueDate=dateFormat(this.data.dueDate);
+               }
+                         if(typeof self.data.draftDate =='object'&&self.data.draftDate!=undefined){
+                this.data.draftDate=dateFormat(this.data.draftDate);
+               }
+               else{
+                  this.data.draftDate=''
+               }
+            this.data.photoList=this.photoList_1;
+              var checked=this.valFormData(this.data);
+              console.log(this.data);
+             if(this.data.billClassify=='2')
+              {
+              this.data.acceptorType='QY'
+              }
+          if(checked.flag){
+                this.$http.put
+          ('/dingtalk//bill/edit/save/'+this.version+'/'+this.id,this.data)
+          .then(res=>{
+                 if(res.data.code=="000000"){
+                   self.$alert('保存成功', '提示', {
+                         confirmButtonText: '确定',
+                        callback: action => {
+                         self.$router.push({path:'/ticks'})
+                             }
+        });
+                 }
+                 else{
+                 }
+          })
+
+          }
+          else{
+              self.$notify({
+          title: '提示',
+          type:'error',
+          message: checked.error,
+          duration: 1000
+        });
+          }
+       
+
+       	},
+
+       },
+       mounted(){
+       	this.id=this.$route.query.id;
+       	this.version=this.$route.query.version;
+       	//this.billNo=this.$route.query.billNo;
+       	this.getData();
+	   }
+	}
+</script>
+<style scoped>
+	.billTable{
+		width:100%;
+		height:200px;
+		background-color: white
+	}
+	.billTable tr td{
+		border:solid 1px #ddd;
+		text-align: center
+	}
+	  .row{
+        display: flex;
+       }
+       .el-dialog__header{
+       	text-align:left;
+       	background-color: #95aacf;
+       	line-height: 30px;
+       }
+       .el-dialog__title{
+       	color:white;
+       }
+       .editPic{
+       	width:200px;height:140px;
+       }
+       .innerDel{
+       	position:absolute;
+       	bottom: 0px;
+       	right:24px;
+       	border-radius: 0px
+       }
+       	 .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #20a0ff;
+    text-align: center
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 200px;
+    height: 140px;
+    line-height: 140px;
+    text-align: center;
+  }
+  .avatar {
+    width: 200px;
+    height: 140px;
+    display: block;
+  }
+   .el-upload--picture-card{
+  	width: 200px;
+    height: 140px;
+    display: block;
+
+  }
+   .el-upload__input{
+  	display: none
+  }
+  .pic_item{
+    width:100%;
+    height:150px;
+
+  }
+  .preImg{
+  width:100%;height:140px;
+  position: absolute;
+  left:0px;
+  padding:0px;
+  top:0px;
+}
+.img_pic{
+  width:100%;
+  height:auto;
+}
+.btn_del{
+  position: relative;
+  left:46%;
+  top: -32px;
+  border-radius: 0px;
+  width:8%;
+  cursor:pointer;
+}
+.tipss{
+  color:white;
+  position:absolute;
+  top:0px;
+  display:block;
+  width:50px;
+  height:30px;
+  background-color:black;
+  opacity:0.5
+}
+</style>
+<style>
+    .el-input__inner{
+    height:30px;
+    width:95%!important;
+  }
+</style>

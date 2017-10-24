@@ -13,7 +13,8 @@ export function alert(self,message){
 
 /*获取用户ID*/
 export function authCode(cb,corpId){
-  DingTalkPC.runtime.permission.requestAuthCode({
+  DingTalkPC.ready(function(){
+         DingTalkPC.runtime.permission.requestAuthCode({
         corpId:corpId,
         onSuccess (result){
           cb(result)
@@ -21,8 +22,8 @@ export function authCode(cb,corpId){
         onFail (err){
           reject(err);
         }
-      });
-
+      }); 
+    })
 }
 
 export function request (config, cb, progressCb) {
@@ -111,8 +112,21 @@ export function checkNum(num){//验证六位浮点数
   var reg=/^\d+(\.\d{2})?$/;
       return reg.test(num)
 }
-export function checkOne(num){
+
+export function checkOne(num){//只能输入整数
   var reg=/^[0-9]$/;
+  return reg.test(num)
+}
+export function checkFloat(num){//只能输入六位小数
+  var reg=/^[0-9]+(.[0-9]{0,6})?$/;
+  return reg.test(num)
+}
+export function checkInit(num){//只能输入正整数
+  var reg=/^(0|\+?[1-9][0-9]*)$/;
+  return reg.test(num)
+}
+export function checkObe(num){//判断小数
+  var reg=/^[+-]?(0|([1-9]\d*))(\.\d+)?$/g;
   return reg.test(num)
 }
 /*传值判空*/
@@ -132,6 +146,38 @@ export function checkNum16(num){
   return reg.test(num)
 
 }
+/*判断是否六位小数*/
+export function checkFloat6(num){
+  var arr=num.split('.');
+  console.log(arr);
+  if(arr[1]){//是否是小数
+    if(arr[1].length>6){
+      return false
+    }
+    else{
+      return true
+    }
+      
+  }
+  else{//不是小数
+    return true
+  }
+
+}
+export function toSixDigit(digitStr_t) {
+            var digitStr = digitStr_t.toString();
+            var t= digitStr.indexOf(".");
+            var len =  digitStr.length;
+
+            if (t>0) {
+                if (len-t < 8) { // digit <= 6
+                    digitStr = digitStr.substring(0,t) + digitStr.substring(t,len);
+                }else{
+                    digitStr = digitStr.substring(0,t) + digitStr.substring(t,8);
+                }
+            }
+            return parseFloat(digitStr);
+        }
     export function returnFloat(value){//保留两位小数
          var value=Math.round(parseFloat(value)*100)/100;
         var xsd=value.toString().split(".");

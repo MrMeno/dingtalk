@@ -10,121 +10,94 @@
 			</div>
 		</div>
 		
-		<div class="row" style='background-color:white'>
+		<div class="row" style='background-color:white;padding:10px;line-height:30px'>
 			<div class="col col-md-12 col-sm-12">
-				<div class="row" style='line-height:30px;padding:10px'>
-					<div class="col col-md-2 col-sm-2 text-right">
-						票号：
-					</div>
-					<div class="col col-md-3 col-sm-3 text-left">
-						<el-input type='text' v-model='tickNum' placeholder='请输入票号'></el-input>
-					</div>
+        <el-row :gutter='20'>
+          <el-col :span='2' class='text-right'>
+            票号：
+          </el-col>
+          <el-col :span='6' class='text-left'>
+              <el-input type='text' @keyup.enter.native='getEnter($event)' v-model='tickNum' placeholder='请输入票号' style='width:350px'></el-input>
+          </el-col>
+          <el-col :span='5' class='text-right'>
+             <el-button type="primary" @click='search'>查询</el-button>
+          </el-col>
+          <el-col :span='5' class='text-left'>
+              <el-button type="danger" @click="cleans">清空</el-button>
+          </el-col>
+          <el-col :span='6' class='text-right'>
+             <el-button type='text' @click='isShow=!isShow'>
+                     {{isShow?'收起':'展开'}}
+                     <i class="el-icon-caret-bottom el-icon--right" v-if='!isShow'></i>
+                     <i class="el-icon-caret-top el-icon--right" v-if='isShow'></i>
+                 </el-button>
+          </el-col>
+          <el-col></el-col>
+        </el-row>
 
-					<div class="col col-md-3 col-sm-3">
-						<div class="row">
-							<div class="col-md-6 col-sm-6 text-right">
-								<el-button type="primary" @click='search'>查询</el-button>
-							</div>
-							<div class="col-md-6 col-sm-6 text-left">
-								<el-button type="danger" @click="cleans">清空</el-button>
-							</div>
-						</div>
-
-					</div>
-					<div class="col col-md-4 col-sm-4 text-right">
-						<div class="row">
-							<div class="col col-md-12 col-sm-12 text-right">
-					           <el-button type='text' @click='isShow=!isShow'>
-					           {{isShow?'收起':'展开'}}
-					           <i class="el-icon-caret-bottom el-icon--right" v-if='!isShow'></i>
-					           <i class="el-icon-caret-top el-icon--right" v-if='isShow'></i>
-					       </el-button>
-							</div>
-						</div>
-					</div>
-				</div>
-
-					<div class="row" style='line-height:30px;padding:10px' v-if='isShow'>
-					<div class="col col-md-2 col-sm-2 text-right">
-						票据类型：
-					</div>
-					<div class="col col-md-5 col-sm-5 text-left">
-						 <el-checkbox-group v-model="billClassify" @change="search">
+        <el-row :gutter='20' style='padding:20px 0px' v-if='isShow'>
+          <el-col :span='2' class='text-right' style='white-space:nowrap;'>
+             票据类型：
+          </el-col>
+          <el-col :span='8' class='text-left'>
+             <el-checkbox-group v-model="billClassify">
                          <el-checkbox v-for='item in billClassifyList' :label='item.dictKey'
                          :key='item.dictKey'>{{item.dictValue}}</el-checkbox>
                       </el-checkbox-group>
-					</div>
-
-					<div class="col col-md-2 col-sm-2 text-right">
-                         来源：
-					</div>
-
-					<div class="col col-md-3 col-sm-3">
-                          <el-checkbox-group v-model="billSource">
+          </el-col>
+          <el-col :span='2' class='text-right'>
+             来源：
+          </el-col>
+          <el-col :span='10' class='text-left'>
+            <el-checkbox-group v-model="billSource">
                          <el-checkbox v-for='items in billSourceList' :key='items.dictKey' :label='items.dictKey'>{{items.dictValue}}</el-checkbox>
                       </el-checkbox-group>
-					</div>
-				</div>
+          </el-col>
+        </el-row>
 
-					<div class="row" style='line-height:30px;padding:10px' v-if='isShow'>
-					<div class="col col-md-2 col-sm-2 text-right">
-						承兑人名称：
-					</div>
-					<div class="col col-md-3 col-sm-3 text-left">
-							<el-input type='text' placeholder='请输入承兑人名称' v-model='acceptorName'></el-input>
-					</div>
-
-					<div class="col col-md-4 col-sm-4 text-right">
-                         是否到期：
-					</div>
-
-					<div class="col col-md-3 col-sm-3">
-                          <el-checkbox-group v-model="due">
-                         <el-checkbox v-for='item in dueList' :label='item.key' :key='item.key'>{{item.value}}</el-checkbox>
-               
-                      </el-checkbox-group>
-					</div>
-				</div>
-
-					<div class="row" style='line-height:30px;padding:10px' v-if='isShow'>
-					<div class="col col-md-2 col-sm-2 text-right">
-						金额：
-					</div>
-					<div class="col col-md-3 col-sm-3 text-left">
-							<div class="row">
-								<div class="col col-md-6 col-sm-6">
-								<el-input type='text' placeholder='请输入金额' v-model='startBillAmount'></el-input>
-							</div>
-							<div class="col col-md-6 col-sm-6">
-								<el-input type='text' placeholder='请输入金额' v-model='endBillAmount'></el-input>
-							</div>
-							</div>
-					</div>
-
-					<div class="col col-md-2 col-sm-2 text-right">
-                         到期日：
-					</div>
-
-			      <div class="col col-md-5 col-sm-5">
-                     <div class="row">
-				      <div class="col col-md-6 col-sm-6">
-				        <el-date-picker type="date" size="small" v-model='startDueDate' format='yyyy-MM-dd' placeholder="选择日期">  </el-date-picker></div>
-				       <div class="col col-md-6 col-sm-6">
-				        <el-date-picker type="date" size="small" v-model='endDueDate' format='yyyy-MM-dd' placeholder="选择日期" > </el-date-picker></div>
-			         </div>
-			    </div>
-			  </div>
-
-			  <div class="row" style='line-height:30px;padding:10px' v-if='isShow'>
-					<div class="col col-md-2 col-sm-2 text-right">
-						承兑人类别：
-					</div>
-					<div class="col col-md-10 col-sm-10 text-left">
-						 <el-checkbox-group v-model="acceptorType">
+         <el-row :gutter='20' v-if='isShow'>
+          <el-col :span='2' class='text-right' style='white-space:nowrap;'>
+             承兑人名称：
+          </el-col>
+          <el-col :span='8' class='text-left'>
+           <el-input type='text' placeholder='请输入承兑人名称' style='width:350px' v-model='acceptorName'></el-input>
+          </el-col>
+          <el-col :span='2' class='text-right' style='white-space:nowrap;'>
+             是否到期：
+          </el-col>
+          <el-col :span='10' class='text-left'>
+             <el-checkbox-group v-model="due">
+                         <el-checkbox v-for='item in dueList' :label='item.key' :key='item.key'>{{item.value}}</el-checkbox>           </el-checkbox-group>
+          </el-col>
+        </el-row>
+      
+           <el-row :gutter='20' style='padding:20px 0px' v-if='isShow'>
+          <el-col :span='2' class='text-right' style='white-space:nowrap;'>
+             金额（元）：
+          </el-col>
+          <el-col :span='8' class='text-left'>
+         <el-input type='text' placeholder='请输入金额' style='width:171px;' v-model='startBillAmount'></el-input>
+          <el-input type='text' placeholder='请输入金额' style='width:171px;' v-model='endBillAmount'></el-input>
+          </el-col>
+          <el-col :span='2' class='text-right'>
+              到期日：
+          </el-col>
+          <el-col :span='8' class='text-left'>
+              <el-date-picker type="date" size="small" v-model='startDueDate' style='width:170px' format='yyyy-MM-dd' placeholder="请选择日期">  </el-date-picker>&nbsp;
+              <el-date-picker type="date" size="small" v-model='endDueDate' style='width:170px' format='yyyy-MM-dd' placeholder="请选择日期">  </el-date-picker>
+          </el-col>
+        </el-row>
+         
+          <el-row :gutter='20' v-if='isShow'>
+          <el-col :span='2' class='text-right' style='white-space:nowrap;'>
+            承兑人类别：
+          </el-col>
+          <el-col :span='20' class='text-left'>
+               <el-checkbox-group v-model="acceptorType">
                          <el-checkbox v-for='items in acceptorTypeList' :label='items.dictKey' :key='items.dictKey'>{{items.dictValue}}</el-checkbox>
                       </el-checkbox-group>
-					</div>
-				</div>
+          </el-col>
+        </el-row>
 
 
 			</div>
@@ -134,64 +107,62 @@
 				<div class="row">
 					<div class="col col-md-12 col-sm-12">
 						 <el-tabs v-model="billStatus" @tab-click="tabSwitch">
-						  <el-tab-pane name='all' label='全部'></el-tab-pane>
-                          <el-tab-pane v-for='item in billStatusList'  :label='item.dictValue' :name='item.dictKey' ></el-tab-pane>
-                       </el-tabs>
+              <el-tab-pane label='全部' name="all"></el-tab-pane>
+              <el-tab-pane v-for='item in billStatusList'  :label='item.dictValue' :name='item.dictKey' ></el-tab-pane>
+            </el-tabs>
 					</div>
 				</div>
 
-				<div class="row" style='padding:10px'>
-				  <div class="col col-md-10 col-sm-10 text-center">
-				  	<div class='row'>
-				  			<div class="col col-md-2 col-sm-2 text-center">
-						<el-button type="primary" @click='all' size='small' v-bind:style="{backgroundColor:btnStyle,borderColor:btnStyle}">{{isTotal?'取消批量操作':'批量操作'}}</el-button>
-					</div>
-					<div class="col col-md-2 col-sm-2 text-center"  v-if='isTotal'>
-						<el-button type="primary" size='small'  @click='dialogVisible=true'>批量更新状态</el-button>
-					</div>
-					<div class="col col-md-2 col-sm-2 text-center"  v-if='isTotal'>
-						<el-button type="danger" size='small'  @click='dialogVisible_d=true'>批量删除</el-button>
-					</div>
-					<div class="col col-md-2 col-sm-2 text-center">
-						<a :href='loadUrl'  ref='loadClick'><el-button size='small' @click='exportTick'>导出</el-button></a>
-            
-					</div>
-				  	</div>
-				  </div>
-				</div>
+        <div class="row" style='padding:11px 0px'>
+          <div class="col col-md-12 col-sm-12 text-left">
+                    <el-button type="primary" @click='all' size='small' v-show='!isTotal' v-bind:style="{backgroundColor:btnStyle,borderColor:btnStyle}">批量操作</el-button>
+              <el-button type="primary" @click='all' size='small' v-show='isTotal' v-bind:style="{backgroundColor:btnStyle,borderColor:btnStyle,width:'100px'}">取消批量操作</el-button>
 
-			<div class="row" style='padding:20px'>
+                    <el-button type="primary" size='small' v-show='isTotal'  @click='dialogVisible=true'>批量更新状态</el-button>
+
+                    <el-button type="danger" size='small' v-show='isTotal'  @click='dialogVisible_d=true'>批量删除</el-button>
+
+                    <el-button size='small' @click='exportTick' :disabled='exportAble'>导出</el-button>
+          </div>
+        </div>
+
+
+			<div class="row" style='padding:0px'>
 				<div class="col col-md-12 col-sm-12">
-				  <el-table ref="multipleTable" height='400' @selection-change="handleSelectionChange" :data="tableData" style="width: 100%;" v-loading="loading">
+				  <el-table ref="multipleTable" height='400' @selection-change="handleSelectionChange" :data="tableData" style="width:100%" v-loading="loading">
                    <el-table-column
                      type="selection" v-if='isTotal'>
                          </el-table-column>
-                    <el-table-column  label="操作">
+                    <el-table-column  label="操作" width='80'>
                          <template scope="scope">
                          	  <el-popover placement="top"  trigger="click" :visible-arrow="true">
-                         	     <div class="row" style='background-color:white;padding:0px 10px;margin:0px'>
-                         	     	<div class="col col-md-3 col-sm-3" v-if="scope.row.ocrStatus!='识别失败'">
-                         	     		 <el-button type='text' @click='detail(scope.row.id,scope.row.version,scope.row.billMedium)'>查看</el-button>
-                         	     	</div>
-                         	     	<div class="col col-md-3 col-sm-3" v-if="scope.row.ocrStatus!='识别失败'">
-                         	     		<el-button type='text' @click='edit(scope.row.id,scope.row.version,scope.row.billNo,scope.row.billMedium)'>编辑</el-button>
-                         	     	</div>
-                         	     	<div class="col col-md-3 col-sm-3 text-center" >
-                         	     		<el-button type='text' @click='singleDel(scope.row.id,scope.row.version)'>删除 </el-button>
-                         	     	</div>
-                         	     	<div class="col col-md-3 col-sm-3" v-if="scope.row.ocrStatus!='识别失败'">
-                         	     		<el-button type='text' @click='telPrice(scope.row)'>询价</el-button>
-                         	     	</div>
-                         	     </div>
+                            <div class="row">
+                              <div class="col col-md-12 col-sm-12">
+                                <ul class="btn_content">
+                                  <li v-if="scope.row.ocrStatus!='识别失败'">
+                                     <el-button type='text' @click='detail(scope.row.id,scope.row.version,scope.row.billMedium)'>查看</el-button>
+                                  </li>
+                                  <li v-if="scope.row.ocrStatus!='识别失败'&&scope.row.ocrStatus!='识别中'">
+                                      <el-button type='text' @click='edit(scope.row.id,scope.row.version,scope.row.billNo,scope.row.billMedium)'>编辑</el-button>
+                                  </li>
+                                  <li>
+                                    <el-button type='text' @click='singleDel(scope.row.id,scope.row.version)'>删除 </el-button>
+                                  </li>
+                                  <li v-if="scope.row.ocrStatus!='识别失败'&&scope.row.ocrStatus!='识别中'">
+                                        <el-button type='text' :disabled='!CompareDates(scope.row.dueDate,getNowFormatDates())' @click='telPrice(scope.row)'>询价</el-button>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
                          	   <img src="../../assets/action.png" slot='reference' style='cursor:pointer'>
                              </el-popover>
                          </template>
                    </el-table-column>
 
-                    <el-table-column label="票号">
+                    <el-table-column :label="'|\n'+'票号'"  width='300'>
                       <template scope="scope">
-                      	  {{scope.row.billNo}} 
-                        <el-popover placement="right" v-if='scope.row.notice' width="400"  trigger="hover" :visible-arrow="false">
+                      	  <span style='word-wrap:break-word'>{{scope.row.billNo}} </span>
+                        <el-popover placement="right" v-if='scope.row.notice' width="400"  trigger="hover" :visible-arrow="false" class='danger_img'>
                            <el-row style='padding:20px;background-color:#fffada;'>
                            	  <div class="col col-md-12 text-center">
                            	       <div class="row">
@@ -207,7 +178,6 @@
                            	       		{{scope.row.notice.applyName||''}}
                            	       	</div>
                            	       </div>
-
                            	        <div class="row" style='padding-top:5px'>
                            	       	<div class="col col-md-4 col-sm-4">
                            	       		票号
@@ -216,22 +186,20 @@
                            	       		{{scope.row.notice.billNo}}
                            	       	</div>
                            	       </div>
-
                            	        <div class="row" style='padding-top:5px'>
                            	       	<div class="col col-md-4 col-sm-4">
                            	       		金额
                            	       	</div>
                            	       	 	<div class="col col-md-8 col-sm-8">
-                           	       		{{scope.row.notice.billAmount}}
+                           	       		{{scope.row.notice.billAmount||0}}元
                            	       	</div>
                            	       </div>
-
                            	       <div class="row" style='padding-top:5px'>
                            	       	<div class="col col-md-4 col-sm-4">
                            	       		公示时间
                            	       	</div>
                            	       	 	<div class="col col-md-8 col-sm-8">
-                           	       		{{scope.row.notice.noticeDate}}
+                           	       		{{dateFormat(new Date(scope.row.notice.noticeDate))||''}}
                            	       	</div>
                            	       </div>
                            	       <div class="row" style='padding-top:5px'>
@@ -239,7 +207,7 @@
                            	       		截止时间
                            	       	</div>
                            	       	 	<div class="col col-md-8 col-sm-8">
-                           	       		{{scope.row.notice.deadline}}
+                           	       		{{dateFormat(new Date(scope.row.notice.deadline))||''}}
                            	       	</div>
                            	       </div>
                            	  </div>
@@ -252,21 +220,21 @@
                     </el-table-column>
 
 
-                    <el-table-column prop="billClassify" label="类型">
+                    <el-table-column prop="billClassify" :label="'|\n'+'类型'" width='100'>
                     </el-table-column>
-                     <el-table-column prop="billAmount" label="金额">
+                     <el-table-column prop="billAmount" :label="'|\n'+'金额'"  width='150'>
                     </el-table-column>
-                     <el-table-column prop="dueDate" label="到期日">
+                     <el-table-column prop="dueDate" :label="'|\n'+'到期日'" width='120'>
                     </el-table-column>
-                     <el-table-column prop="acceptorName" label="承兑人">
+                     <el-table-column prop="acceptorName" :label="'|\n'+'承兑人'">
                     </el-table-column>
-                     <el-table-column prop="acceptorTypeName" label="承兑人类别">
+                     <el-table-column prop="acceptorTypeName" :label="'|\n'+'承兑人类别'" width='120'>
                     </el-table-column>
-                     <el-table-column prop="billStatus" label="状态">
+                     <el-table-column prop="billStatus" :label="'|\n'+'状态'" width='80'>
                                 
                     </el-table-column>
 
-                     <el-table-column prop="ocrStatus" label="识别状态">
+                     <el-table-column prop="ocrStatus" :label="'|\n'+'状态识别'" width='120'>
                                 
                     </el-table-column>
                     </el-table>
@@ -286,15 +254,15 @@
                        <div class="row">
                        	<div class="col col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
                        		<div class="row">
-                       			<div class="col col-md-6 col-sm-6">
+                       			<div class="col col-md-6 col-sm-6 text-right">
                        				票面总额：
                        			</div>
                        			<div class="col col-md-6 col-sm-6 text-left">
-                       			  {{tickAmount}}元
+                       			  {{tickAmount||0}}元
                        			</div>
                        		</div>
                        		<div class="row" style='padding-top:30px'>
-                       			<div class="col col-md-6 col-sm-6">
+                       			<div class="col col-md-6 col-sm-6 text-right">
                        				累计张数：
                        			</div>
                        			<div class="col col-md-6 col-sm-6 text-left">
@@ -303,7 +271,7 @@
                        		</div>
 
                        		<div class="row" style='padding-top:30px'>
-                       			<div class="col col-md-6 col-sm-6">
+                       			<div class="col col-md-6 col-sm-6 text-right">
                        				状态设置：
                        			</div>
                        			<div class="col col-md-6 col-sm-6 text-left">
@@ -337,11 +305,11 @@
 
                        			<div class="row" >
                        			<div class="col col-md-12 col-sm-12 text-center">
-                       				<strong>确认要删除以下票据？</strong>
+                       				<span style='color:#333'>确认要删除以下票据？</span>
                        			</div>
                        		</div>
                        		<div class="row" style='padding-top:30px'>
-                       			<div class="col col-md-6 col-sm-6">
+                       			<div class="col col-md-6 col-sm-6 text-right">
                        				票面总额：
                        			</div>
                        			<div class="col col-md-6 col-sm-6 text-left">
@@ -349,7 +317,7 @@
                        			</div>
                        		</div>
                        		<div class="row" style='padding-top:30px'>
-                       			<div class="col col-md-6 col-sm-6">
+                       			<div class="col col-md-6 col-sm-6 text-right">
                        				累计张数：
                        			</div>
                        			<div class="col col-md-6 col-sm-6 text-left">
@@ -415,17 +383,20 @@
                        <el-col :span='2' style='text-align:left'>
                          贴现地：
                        </el-col>
-                       <el-col :span='4' style='text-align:left'>
+                       <el-col :span='3' style='text-align:left'>
                          <el-select v-model="province" filterable clearable  placeholder="请选择" @change='getCity'>
                            <el-option v-for='items in provinceList' :label='items.areaName' :key='items.areaNo' :value='items.areaNo' ></el-option>
-                         </el-select>       
+                         </el-select>
+                         </el-col>
+                            <el-col :span='3' style='text-align:left'>
+                            <el-select v-model="city" filterable clearable  placeholder="请选择">
+                           <el-option v-for='items in cityList' :label='items.areaName' :key='items.areaNo' :value='items.areaNo'></el-option>
+                         </el-select>     
                        </el-col>
 
-                       <el-col :span='4' style='text-align:left'>
-                         <el-select v-model="city" filterable clearable  placeholder="请选择">
-                           <el-option v-for='items in cityList' :label='items.areaName' :key='items.areaNo' :value='items.areaNo'></el-option>
-                         </el-select>
-                       </el-col>
+                   <!--     <el-col :span='4' style='text-align:left'>
+                      
+                       </el-col> -->
                        <el-col :span='4' style='text-align:right'>
                          合计扣款（万元）:
                        </el-col>
@@ -441,43 +412,45 @@
 
                    </el-row> 
                    <el-row style='padding-top:30px' v-if='priceData!=null'>
-                      <el-col>
-                          <el-table  :data="priceData" height='300' style='overflow-x:hidden'>        
+                      <el-col style='overflow-x:hidden'>
+                          <el-table  :data="priceData" height='300'>        
                              <el-table-column
-                           prop="orgName"
                           label="名称">
+                          <template scope='scope'>
+                             {{scope.row.orgName}} <el-tag class='atags' type="primary" v-show="scope.row.inquiryTags=='nearest'">最近</el-tag><el-tag class='atags' type="primary" v-show="scope.row.inquiryTags=='lowest'">最低</el-tag><el-tag class='atags' v-show="scope.row.inquiryTags=='nearLowest'" type="primary">最近且最低</el-tag> 
+                          </template>
                           </el-table-column>
                            <el-table-column
                            prop="distance"
-                          label="距离/km">
+                          label="距离/km" sortable width='120'>
                           </el-table-column>
                            <el-table-column
                            prop="tradeModel"
-                          label="模式">
+                          label="模式" width='120'>
                           </el-table-column>
                            <el-table-column
                           
-                          label="合计扣款（万元）">
+                          label="合计扣款（万元）" width='150'>
                           <template scope='scope'>
-                           {{scope.row.totalDeduct/10000}}
+                           {{toFixed(scope.row.totalDeduct/10000,6)}}
                           </template>
                           </el-table-column>
                            <el-table-column
                            prop="price"
-                          label="价格">
+                          label="价格" width='120'>
                           </el-table-column>
                            <el-table-column
                            prop="addDays"
-                          label="加天">
+                          label="加天" width='80'>
                           </el-table-column>
 
                            <el-table-column
                            prop="area"
-                          label="所属区域">
+                          label="所属区域" width='200'>
                           </el-table-column>
 
                        <el-table-column type="expand">
-                          <template scope="props"  @click='getRead'>
+                          <template scope="props"   @click='getRead'>
                              <div class="row">
                                <div class="col col-md-12 col-sm-12 text-left">
                                  联系方式：{{props.row.contactWay}}
@@ -490,17 +463,23 @@
                              </div>
                               <div class="row" style='padding-top:10px'>
                                <div class="col col-md-12 col-sm-12 text-left">
-                                 计息天数：{{props.row.limitDays}}
+                                 计息天数：{{props.row.limitDays}}天
                                </div>
                              </div>
                               <div class="row" style='padding-top:10px'>
                                <div class="col col-md-12 col-sm-12 text-left">
-                                 贴现利息：{{props.row.interest}}
+                                 贴现利息：{{props.row.interest}}元
                                </div>
                              </div>
                               <div class="row" style='padding-top:10px'>
-                               <div class="col col-md-12 col-sm-12 text-left">
-                                 费用合计：{{props.row.totalDeduct}}
+                               <div class="col col-md-2 col-sm-2 text-left">
+                                 费用合计：{{props.row.totalDeduct}}元
+                               </div>
+                                <div class="col col-md-2 col-sm-2 text-left">
+                                 查询费：{{props.row.queryFee}}元
+                               </div>
+                                <div class="col col-md-2 col-sm-2 text-left">
+                                 电汇费：{{props.row.wireFee}}元
                                </div>
                              </div>
                               <div class="row" style='padding-top:10px'>
@@ -509,21 +488,18 @@
                                </div>
                              </div>
                               <div class="row" style='padding-top:10px'>
-                               <div class="col col-md-12 col-sm-12 text-left">
+                               <div class="col col-md-10 col-sm-10 text-left">
                                  公司介绍：{{props.row.orgIntro}}
                                </div>
                              </div>
                               <div class="row" style='padding-top:10px'>
-                               <div class="col col-md-12 col-sm-12 text-left">
+                              <div class="col col-md-10 col-sm-10 text-left">
                                  主营业务：{{props.row.orgBus}}
                                </div>
                              </div>
-
                          </template>
                           </el-table-column>
                           </el-table>
-
-                         
                       </el-col>
                    </el-row>  
                    <el-row>
@@ -539,7 +515,7 @@
 </template>
 
 <script>
-import {checkNum} from '../../lib/tools.js'
+import {checkNum,tofixed,CompareDate,getNowFormatDate,checkEmpty} from '../../lib/tools.js'
 	export default{
 		data(){
 			return {
@@ -554,7 +530,7 @@ import {checkNum} from '../../lib/tools.js'
 				tableData:[],
 				multipleSelection:[],
 				pageNo:1,//当前页码
-				pageSize:5,//每页条数
+				pageSize:10,//每页条数
 				totalPage:1,//总页数
 				totalItem:1,//总条数
         acceptorName:'',//承兑人
@@ -605,6 +581,7 @@ import {checkNum} from '../../lib/tools.js'
       {params="?brief=brief&pageNo="+this.pageNo+"&pageSize="+this.pageSize;}
             this.getData(params);
 		},
+
 		computed:{
            tickAmount:function(){
            	let self=this;
@@ -614,13 +591,28 @@ import {checkNum} from '../../lib/tools.js'
                     amounts+=self.multipleSelection[i].billAmount;
            		}
            	}
+            if(amounts=='NaN'){
+              amounts=0;
+             }
            	return amounts
            },
            pieces:function(){
            	return this.multipleSelection.length||0;
+           },
+           exportAble:function(){
+            return this.tableData.length>0?false:true
            }
 		},
 		methods:{
+          toFixed(num,v){
+    return tofixed(num,v)
+    },
+    CompareDates(d1,d2){
+    return CompareDate(d1,d2)
+    },
+    getNowFormatDates(){
+        return getNowFormatDate()
+    },
 			all(){
 				this.isTotal=!this.isTotal;
                if(this.isTotal){
@@ -630,22 +622,71 @@ import {checkNum} from '../../lib/tools.js'
                	this.btnStyle=""
                }         
 			},
+      getEnter(e){
+        if(Number(e.keyCode)==13){
+          this.search();
+        }
+       },
 	    handleSelectionChange(val) {
            this.multipleSelection = val;
-           console.log(this.multipleSelection)
           },
 
-			tabSwitch(tab){
-				let self=this;
+			tabSwitch(tab,event){
+				        let self=this;
+                this.billStatus=tab.name;
                  this.loading=true;
                  this.search();
-                 // setTimeout(()=>{
-                 // 	this.loading=false
-                 // },1000)
 			},
-      telPrice(row){
+      checkDate(strDate1,strDate2){
+        if(strDate1!=''&&strDate2!=''){
+        if(strDate1>strDate2){
+       return {error:'开始日期不能晚于结束日期',flag:false}
+        }
+        else{
+          return {error:'',flag:true}
+        }
+      }
+      else{
+        return {error:'',flag:true}
+      }
+      },
+      checkTelData(row){
+        var isBank;//是否银票
+        if(row.billClassify=="电子银票"||row.billClassify=="纸质银票"){
+              isBank=true
+        }
+        else{
+          isBank=false
+        }
+       if(checkEmpty(row.acceptorType)){
+        return {flag:false,tips:'请补充承兑人类别，以便进行询价'}
+       }
+        else if(checkEmpty(row.billClassify)){
+        return {flag:false,tips:'请补充票据类型，以便进行询价'}
+       }
+        else if(checkEmpty(row.acceptorType)){
+        return {flag:false,tips:'请补金额，以便进行询价'}
+       }
+        else if(checkEmpty(row.acceptorType)){
+        return {flag:false,tips:'请补充到期日，以便进行询价'}
+       }
+       else if(!isBank&&checkEmpty(row.acceptorName)){
+        return {flag:false,tips:'商票询价需要完善承兑人（付款人全称）信息'}
+       }
+       else{
+        return {flag:true,tips:''}
+       }
+   
+      },
+      telPrice(row){//询价四要素：承兑人类别acceptorType，票据类型billClassify，金额billAmount，到期日dueDate
         let self=this;
-        console.log(row);
+        this.city='';
+        this.province='';
+        this.priceParams.totalDeductLower='';
+        this.priceParams.totalDeductUp='';
+        this.priceData=[];
+        var checkResult=self.checkTelData(row);
+        if(checkResult.flag){
             this.selectRow=row;
             var body={
                 billId:row.id,
@@ -653,7 +694,6 @@ import {checkNum} from '../../lib/tools.js'
             }
             this.dialogVisible_x=true;
              this.$http.post('/dingtalk/inquiry/price',body).then(res=>{
-              console.log(res);
                   if(res.data.code=='000000'){
                              self.priceData=res.data.data.result; 
                              self.priceParams.inquiryId=self.priceData[0].inquiryId;
@@ -668,19 +708,24 @@ import {checkNum} from '../../lib/tools.js'
                     self.provinceList=res.data.data.provinceList;
                   }
             })
+          }
+          else{
+            self.$alert(checkResult.tips)
+          }
       },
       cleans(){
             this.tickNum='';
-            this.billClassify='';
-            this.billStatus='';
-            this.billSource='';
+            this.billClassify=[];
+            this.billStatus=[];
+            this.billSource=[];
             this.startBillAmount='';
             this.endBillAmount='';
             this.acceptorName='';
-            this.acceptorType='';
+            this.acceptorType=[];
             this.endDueDate='';
             this.startDueDate='';
-            this.due='';
+            this.due=[];
+            this.search();
       },
       getPriceList(){
         let self=this;
@@ -702,6 +747,7 @@ import {checkNum} from '../../lib/tools.js'
            if(this.priceParams.sort!=''){
             params+='&sort='+this.priceParams.sort;
            }
+
            this.$http.get('/dingtalk/inquiry/result/list'+params).then(res=>{
             if(res.data.code=='000000'){
               self.priceParams.inquiryId=res.data.data.inquiryId;
@@ -724,10 +770,10 @@ import {checkNum} from '../../lib/tools.js'
             })
       },
       getRead(){
-        console.log('111111')
 
       },
 			 dateFormat(data) {//日期格式化
+        if(data!=''&&data!=null&&data!='Invalid Date'){
             var fmt = "yyyy-MM-dd";
             var o = {
                 "M+": data.getMonth() + 1, //月份 
@@ -742,10 +788,11 @@ import {checkNum} from '../../lib/tools.js'
             for (var k in o)
             if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
             return fmt;
+          }
+          else{
+            return ''
+          }
          },
-           getBillClassify(value){
-               console.log(this.billClassify)
-           },
            getBillType(e,key){
            	let self =this;
               Array.prototype.remove=function(obj){ 
@@ -767,7 +814,6 @@ import {checkNum} from '../../lib/tools.js'
           }else{
            self.billClassify.remove(key);
           }
-          console.log(this.billClassify);
            },
 			actionList(){
 
@@ -798,7 +844,7 @@ import {checkNum} from '../../lib/tools.js'
 				   	 params+='&billStatus='+self.billStatus;
 				     }
 				     else{
-				     	self.billStatus=''
+				     	self.billStatus='all'
 				     }
 				    if(self.billClassify!=null){
 				    	 for(var i=0;i<self.billClassify.length;i++){//多选项  
@@ -818,23 +864,34 @@ import {checkNum} from '../../lib/tools.js'
 				    if(self.due!=null&&self.due!=undefined&&self.due.length==1){
                 params+='&due='+self.due[0];
              }		
+        if(self.checkDate(self.startDueDate,self.endDueDate).flag){
 
-				this.getData(params);
+          this.getData(params);
+        }
+        else{
+               this.$message({
+               showClose: true,
+              duration:3000,
+               type:'warning',
+             message: self.checkDate(self.startDueDate,self.endDueDate).error
+              });
+
+        }
+				
 			},
 			getData(params){
 				let self=this;
 				this.loading=true;
 				this.$http.get('/dingtalk/bill/list'+params).then(res=>{
-					console.log(res)
 					if(res.data.code=='000000'){
 						self.totalItem=res.data.data.page.totalCount;
-                        self.totalPage=res.data.data.page.totalPages;
+            self.totalPage=res.data.data.page.totalPages;
 						self.tableData=res.data.data.page.result;
 						self.billClassifyList=res.data.data.billClassify;
 						self.billSourceList=res.data.data.billSource;
 						self.acceptorTypeList=res.data.data.acceptorType;
-						self.billStatusList=res.data.data.billStatus;
-						setTimeout(()=>{
+						self.billStatusList=res.data.data.billStatus;			
+            			setTimeout(()=>{
                  	this.loading=false
                        },500)
 					}
@@ -848,31 +905,38 @@ import {checkNum} from '../../lib/tools.js'
 		    	this.pageSize=val;
           this.pageNo=1;
 		    	this.search();
-              console.log(`每页 ${val} 条`);
-              console.log(this.totalItem)
              },
              handleSizeChange1(val) {//每页条数变化
           this.priceParams.pageSize=val;
           this.priceParams.pageNo=1;
-          this.getPriceList();
+           this.getPriceList();
              },
 			handleCurrentChange(val) {//点击跳页
 				this.pageNo=val;
-				this.search();
-               console.log(`当前页: ${val}`);
+				 this.search();
              },
          handleCurrentChange1(val) {//点击跳页
         this.priceParams.pageNo=val;
         this.getPriceList();
-               console.log(`当前页: ${val}`);
              },
-             p_update(){
+        p_update(){
              	let self=this;
              	var ids=[];
+              var checked=true;
              	for(var i=0;i<self.multipleSelection.length;i++){
-             		ids.push(self.multipleSelection[i].id)
+             		ids.push(self.multipleSelection[i].id);
+                if(self.multipleSelection[i].ocrStatus=='识别失败'||self.multipleSelection[i].ocrStatus=='识别中'){
+                  checked=false;
+                  break;
+                }
+                else{
+                  checked=true
+                }
              	}
-             	this.dialogVisible=false;
+              if(ids.length!=0){    
+              if(checked)
+                  {
+                    if(self.billStatus_p!=''){
                 this.$http.post
                 ('/dingtalk/bill/update/state',{ids:ids,status:self.billStatus_p}).then(res=>{
                 	if(res.data.code=='000000'){
@@ -893,6 +957,35 @@ import {checkNum} from '../../lib/tools.js'
                            });
                 	}
                 })
+              this.dialogVisible=false;
+            }
+            else{
+                        this.$message({
+                        showClose: true,
+                        duration:3000,
+                         type:'warning',
+                       message: '请选择需要更新的状态'
+                           });
+            }
+            }
+            else{
+              this.$message({
+                        showClose: true,
+                        duration:3000,
+                         type:'warning',
+                       message: '识别失败或者识别中的票据无法更新状态'
+                           });
+            }
+              }
+              else{
+                   this.$message({
+                        showClose: true,
+                        duration:3000,
+                         type:'warning',
+                       message: '请先选择需要操作的票据'
+                           });
+              }
+
              },
              p_del(){
              	let self=this;
@@ -900,6 +993,7 @@ import {checkNum} from '../../lib/tools.js'
              	for(var i=0;i<self.multipleSelection.length;i++){
              		ids.push(self.multipleSelection[i].id)
              	}
+              if(ids.length>0){
              	this.dialogVisible_d=false;
                 this.$http.post
                 ('/dingtalk/bill/del/list',{ids:ids}).then(res=>{
@@ -921,8 +1015,18 @@ import {checkNum} from '../../lib/tools.js'
                            });
                 	}
                 })
+              }
+              else{
+                      this.$message({
+                        showClose: true,
+                        duration:3000,
+                         type:'warning',
+                       message: '请选择需要删除的数据'
+                           });
+
+              }
               
-			},
+			   },
              singleDel(id,version){
                let self=this;
                this.$confirm('确认删除该条数据?', '提示', {
@@ -991,7 +1095,7 @@ import {checkNum} from '../../lib/tools.js'
 				   	 params+='&billStatus='+self.billStatus;
 				     }
 				     else{
-				     	self.billStatus=''
+				     	self.billStatus='all'
 				     }
 				    if(self.billClassify!=null){
 				    	 for(var i=0;i<self.billClassify.length;i++){//多选项  
@@ -1013,22 +1117,14 @@ import {checkNum} from '../../lib/tools.js'
 				    		params+='&due['+i+']='+self.due[i];
 				    	}
 				    };
-            if(params!=''){
+       
             this.loadUrl='/dingtalk/bill/export'+param+params;
-          }
-          else{
-            this.loadUrl=undefined;
-            this.$alert('请输入查询参数')
-          }
-				    // this.$http.get('/dingtalk/bill/export'+params).then(res=>{
-				    // 	// var blob = new Blob([res.data], {type: 'application/vnd.ms-excel'});
-        //  //                 fileName = '导出票据';
-        //  //                 console.log(blob);
-        //  //               self.downFile(blob, fileName);
-        //       // window.open('http://www.baidu.com')
-                     
-        //                self.$biz.util.open('http://www.baidu.com')
-				    // })
+            if(this.tableData.length!=0){
+                 this.loadUrl='/dingtalk/bill/export'+param+params;
+                 window.location.href=this.loadUrl;
+            }
+
+        
             
            },
              detail(id,version,type){
@@ -1050,23 +1146,98 @@ import {checkNum} from '../../lib/tools.js'
 		background-color: black;
 	}
 	.cell{
-		text-align: center
+		text-align: center;
 	}
 	.el-popover{
 		max-width: 250px;
 		margin:0px;
 		padding:0px;
 	}
-</style>
-<style> 
-.cell{
-  text-align: center
-}
-    .el-input__inner{
+  .btn_content{
+    list-style: none;
+    display: flex;
+    width:100%;
+    text-align: center;
+    padding: 0px;
+    margin: 0px;
+
+  }
+  .btn_content>li{
+    float:left;
+    flex:1;
+    width: 50px;
+    text-align: center;
+    padding: 0px;
+    margin: 0px
+  }
+        .el-input__inner{
+    height:30px;
     width:95%!important;
   }
+     .el-input__icon.el-icon-date{
+    position:absolute;
+    right:20px;
+  }
+  .el-input__icon.el-icon-close{
+       position:absolute;
+       right:30px;
+  }
+
+  .el-loading-mask{
+    background-color: rgba(255,255,255,.9)!important
+  }
+  .danger_img{
+    position: absolute;
+    top:0px;
+    right:0px;
+  }
+.el-table__expanded-cell{
+  overflow-x:hidden;
+}
+
+
+ .tab-nav{
+       list-style: none;
+       display: block;
+       width:100%;
+  }
+  .el-button{
+       width:120px;
+  }
+    .el-button.el-button--text{
+       width:30px;
+  }
+  .tab-nav>li{
+       float:left;
+       line-height: 30px;
+       font-size: 15px;
+       text-align: left;
+       padding:10px;
+  }
+
+</style>
+<style>
+.el-table__body-wrapper{
+  overflow-x:hidden;
+  overflow-y:auto;
+} 
+.cell{
+  text-align: left;
+  font-weight: 500
+ }
   .el-input__icon.el-icon-date.el-icon-close{
     position:absolute;
     right:10px;
   }
+  .el-dialog__header{
+    padding-bottom: 10px
+  }
+    .el-table__row .el-table_1_column_1{
+    min-height: 50px !important;
+  }
+.el-checkbox__label{
+  font-weight: 500!important
+}
+
+
 </style>

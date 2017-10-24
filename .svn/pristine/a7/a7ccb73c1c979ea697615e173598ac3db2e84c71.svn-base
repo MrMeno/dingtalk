@@ -1,0 +1,154 @@
+<template>
+	<div class='container-fluid' style='height:100%'>
+		<div class="row" style='height:100%'>
+			        <div class="col col-md-12 col-sm-12 text-left">
+
+                <div class="row" style='padding-top:10px'>
+                <div class="col col-md-12 col-sm-12 text-left" style='padding:0px'>
+                    工具><span style='color:#999;font-size:12px'>公示催告</span>
+                </div>
+                </div>
+
+                <div class="row" style='min-height:700px;background-color:white;'>
+                     <div class="col col-md-12 col-sm-12">
+                        <div class="row"  style='padding-top:30px;'>
+                        <div class="col col-md-12 col-sm-12">
+                          <div class="row">
+                            <div class="col col-md-4 col-sm-4 text-right">
+                              票号
+                            </div>
+                            <div class="col col-md-4 col-sm-4">
+                              <el-input @keyup.enter.native='getEnter($event)' v-model="billNo" placeholder="请输入16位票号"></el-input>
+                            </div>
+                            <div class="col col-md-4 col-sm-4" v-if='!isRight'>
+                              <label style='color:red'>票号必须为16位</label>
+                            </div>
+                          </div>
+
+                          <div class="row" style='padding-top:20px'>
+                            <div class="col col-md-6 col-sm-6 text-right">
+                              <el-button @click='resets()'>重置</el-button>
+                            </div>
+                            <div class="col col-md-6 col-sm-6 text-left">
+                              <el-button type="primary" @click='getData'>查询</el-button>
+                            </div>
+                          </div>
+                        </div>
+                        </div>
+
+                        <div class="row" style='padding-top:30px'>
+                           <div class="col col-md-6 col-sm-6 col-md-offset-3 col-sm-offset-3 text-left">
+                              <p style='color:#57a9ff'>
+                                免责声明：
+                              </p>
+                              <p style='color:#d1d2d5'>
+                                公示催告数据来源于人民法院、省市法制报以及其它报纸。因票友邦未收录相关公示催告数据导致的风险及损失，与票友邦无关。
+                              </p>
+                           </div>
+                        </div>
+
+                        <div class="row" style="background-color:white;padding-top:20px" v-if='data.length!=0'>   
+                          <div class="col col-md-6 col-sm-6 col-md-offset-3 col-sm-offset-3">
+                              <div class="row">
+                                <div class="col col-md-5 col-sm-5 text-center" style='color:#5c5c5c'>
+                                  申请人
+                                </div>
+                                <div class="col col-md-7 col-sm-7 text-left">
+                                  {{data.applyName}}
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col col-md-5 col-sm-5 text-center" style='color:#5c5c5c'>
+                                  票号
+                                </div>
+                                <div class="col col-md-7 col-sm-7 text-left" >
+                                  {{data.billNo}}
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col col-md-5 col-sm-5 text-center" style='color:#5c5c5c'>
+                                  金额
+                                </div>
+                                <div class="col col-md-7 col-sm-7 text-left">
+                                  {{data.billAmount}}
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col col-md-5 col-sm-5 text-center" style='color:#5c5c5c'>
+                                  公示时间
+                                </div>
+                                <div class="col col-md-7 col-sm-7 text-left">
+                                 {{data.noticeDate}}
+                                </div>
+                              </div>
+
+                               <div class="row">
+                                <div class="col col-md-5 col-sm-5 text-center" style='color:#5c5c5c'>
+                                  截止时间
+                                </div>
+                                <div class="col col-md-7 col-sm-7 text-left">
+                                  {{data.deadline}}
+                                </div>
+                              </div>
+                          </div>
+                        </div>
+
+                         <div class="row" style="background-color:white;padding-top:20px" v-if='data.length==0'>
+                           <div class="col col-md-6 col-sm-6 col-md-offset-3 col-sm-offset-3 text-center">
+                               <img src="../../assets/blankspace.png" alt="">
+                               <p style='color:#ddd'> 暂无数据</p>
+                           </div>
+                         </div>
+
+
+                     </div>
+                   </div>
+		  	</div>
+		</div>
+	</div>
+</template>
+<script>
+import {checkNum16} from '../../lib/util.js'
+  export default {
+    data() {
+      return {
+        activeName: 'first',
+        billNo:'',
+        data:[],
+        isRight:true
+      };
+    },
+   computed:{
+         
+    },
+    methods: {
+      handleClick(tab, event) {
+        console.log(tab, event);
+      },
+        getEnter(e){
+      console.log(e)
+        if(Number(e.keyCode)==13){
+          this.getData();
+        }
+       },
+      getData(){
+        let self=this;
+        this.isRight=checkNum16(this.billNo);
+        if(this.isRight){   
+          var params='?billNo='+self.billNo;
+        this.$http.get('/dingtalk/tools/notice/list'+params).then(res=>{
+          console.log(res);
+          self.data=res.data.data
+        })}
+        else{
+           this.isRight=false;
+           this.data=[];
+        }
+      },
+      resets(){
+        this.billNo=''
+        this.isRight=true
+      }
+    }
+  };
+</script>

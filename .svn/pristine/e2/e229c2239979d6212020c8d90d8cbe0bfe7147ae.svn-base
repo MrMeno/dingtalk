@@ -1,0 +1,433 @@
+<template>
+		<div class='container-fluid' style='line-height:30px;padding-bottom:20px'>
+		<div class="row">
+			<div class="col col-md-12 col-sm-12 text-center">
+         <div class="row" style='padding:10px'>
+                <div class="col col-md-12 col-sm-12 text-left" style='padding:0px'>
+                    票据><span style='color:#999;font-size:12px'>{{data.billNo||'识别中'}}</span>
+                </div>
+              </div>
+
+    
+			</div>
+		</div>
+		<div class="row" style='background-color:white'>
+			<div class="col col-md-12 col-sm-12 text-center">
+				<div class="row" style='padding:10px' v-if='data.photoList!=null'>
+					<div class="col col-md-8 col-sm-8 col-md-offset-2 col-sm-offset-2">
+						 <el-carousel  arrow="always" :autoplay='false' @click='getItem'>
+                         <el-carousel-item v-for="(item,index) in data.photoList" ref="getIndex" :key="index" :label="item.picType=='front'?'正面':'背面'">
+                                 <img v-bind:src="data.hostUrl+item.picUrl" alt="" @click="clickImg()">
+                                 <span class='tipss'>{{index+1+'/'+data.photoList.length}}<br></span>
+                              </el-carousel-item>
+                           </el-carousel>
+					</div>
+				</div>
+
+				<div class="row" style='padding:5px;color:#5c5c5c' v-loading='loading'  element-loading-text="识别中，预计30-60秒完成，请耐心等待">
+					<div class="col col-md-12 col-sm-12" style='background-color:#f5f7fb'>
+						<div class="row" style='padding:10px'>
+							<div class="col col-md-3 col-sm-3 text-left">
+								 <div style='padding-top:10%;'>
+								 	{{(data.billMedium+data.billType)||''}}
+								 </div>
+							  </div>
+
+							<div class="col col-md-6 col-sm-6 text-center">
+								<h3 style='border-bottom:solid 2px #b9c2d2'>
+									<span style='display:block;padding:20px'>{{data.billType=='银票'?'银行':'商业'}}承兑汇票</span>
+								</h3>
+							</div>
+						</div>
+
+						<div class="row" style='padding:10px'>
+							<div class="col col-md-5 col-sm-5 text-left">
+							票号：	{{data.billNo}}
+							</div>
+							<div class="col col-md-5 col-sm-5 text-left">
+								出票日：{{data.draftDate}}
+                             </div>
+							<div class="col col-md-2 col-sm-2 text-left">
+								  状态：{{data.billStatus}}
+                             </div>
+						</div>
+
+						<div class="row" style='padding:10px'>
+
+							<div class="col col-md-5 col-sm-5 text-left">
+						剩余期限：	{{Number(data.limitDays)==0?'已到期':Number(data.limitDays)+'天'}}
+							</div>
+
+							<div class="col col-md-5 col-sm-5 text-left" style='word-break:keep-all;'>
+						调整：	{{data.adjustDays}}天<span>
+								（节假日顺延{{data.delayDays}}天）
+							</span>
+							</div>
+							<div class="col col-md-2 col-sm-2 text-left">
+								来源： {{data.billSource}}
+                             </div>
+						</div>
+
+						<div class="row" style='padding:20px;'>
+                            <table class='billTable' v-if="data.billType=='银票'">
+                            	<tr>
+                            		<td colspan='3' style='width:15%'>出票人全称</td>
+                            		<td colspan='2' style='width:33%'>
+                            			{{data.drawerName}}{{data.ocrStatus}}
+                            		</td>
+                            		<td rowspan='3' style='width:2%;padding:10px'><p>收</p><p>款</p><p>人</p></td>
+                            		<td style='width:15%'>全称</td>
+                            		<td style='width:33%'>
+                            			{{data.payeeName}}
+                            		</td>
+                            	</tr>
+                            	<tr>
+                            		<td colspan='3'>出票人账号</td>
+                            		<td colspan='2'>{{data.drawerAcct}}</td>
+                            		<td>账号</td>
+                            		<td>{{data.payeeAcct}}</td>
+                            	</tr>
+                            	<tr>
+                            		<td colspan='3'>付款行全称</td>
+                            		<td>{{data.drawerBank}}</td>
+                                <td style='width:10%'>{{data.acceptorType}}</td>
+                            		<td>开户银行</td>
+                            		<td>{{data.payeeBank}}</td>
+                            	</tr>
+                            	<tr>
+                            		<td colspan='3' style='padding:10px 0px'>出票金额</td>
+                            		<td colspan='4'>{{data.billAmountUpper}}</td>
+                            		<td>
+                                  <table class='amonts'>
+                                    <tr>
+                                      <td>亿</td>
+                                      <td>千</td>
+                                      <td>百</td>
+                                      <td>十</td>
+                                      <td>万</td>
+                                      <td>千</td>
+                                      <td>百</td>
+                                      <td>十</td>
+                                      <td>元</td>
+                                      <td>角</td>
+                                      <td>分</td>
+                                    </tr>
+                                    <tr>
+                                      <td v-for='items in divNum(data.billAmount||0)'>{{items}}</td>
+                                    </tr>
+                                </table>
+                              </td>
+                            	</tr>
+                            	<tr>
+                            		<td colspan='3' style='padding:10px'>汇票到期日</td>
+                            		<td colspan='2'>{{data.dueDate}}</td>
+                            		<td rowspan='2'><p>付</p><p>款</p><p>行</p></td>
+                            		<td>
+                            			 行号
+                            		</td>
+                            		<td>{{data.acceptorBankNo}}</td>
+                    
+                            	</tr>
+                            	<tr>
+                            		<td colspan='3'>交易合同号</td>
+                            		<td colspan='2'>{{data.contractNo}}</td>
+                            		<td>地址</td>
+                            		<td>{{data.acceptorBankAddr}}</td>
+                            	</tr>
+                            </table>
+
+
+                                   <table class='billTable' v-else>
+                              <tr> 
+                              <td rowspan='3' style='width:2%;padding:10px'>付款人</td>                        
+                                <td colspan='1' style='width:15%'>全称</td>
+                                <td colspan='2' style='width:33%'>
+                                  {{data.drawerName}}
+                                </td>
+                                <td rowspan='3' style='width:2%;padding:10px'>收款人</td>
+                                <td style='width:12%'>全称</td>
+                                <td style='width:36%'>
+                                 
+                                   {{data.payeeName}}
+                                </td>
+                              </tr>
+                              <tr>
+                                <td colspan='1'>账号</td>
+                                <td colspan='2'>{{data.drawerAcct}}</td>
+                                <td>账号</td>
+                                <td>{{data.payeeAcct}}</td>
+                              </tr>
+                              <tr>
+                                <td colspan='1'>开户银行</td>
+                                <td>{{data.drawerBank}}</td>
+                                <td style='width:8%'>{{data.acceptorType}}</td>
+                                <td>开户银行</td>
+                                <td>  {{data.payeeBank}}</td>
+                              </tr>
+                              <tr>
+                                <td colspan='2' style='padding:10px 0px'>出票金额</td>
+                                <td colspan='4'>{{data.billAmountUpper}}</td>
+                                <td>
+                                  <table class='amonts'>
+                                    <tr>
+                                      <td>亿</td>
+                                      <td>千</td>
+                                      <td>百</td>
+                                      <td>十</td>
+                                      <td>万</td>
+                                      <td>千</td>
+                                      <td>百</td>
+                                      <td>十</td>
+                                      <td>元</td>
+                                      <td>角</td>
+                                      <td style='border-right:0px'>分</td>
+                                    </tr>
+                                    <tr>
+                                       <td v-for='items in divNum(data.billAmount||0)'>{{items}}</td>
+                                    </tr>
+                                </table>
+                              </td>
+                              </tr>
+                              <tr>
+                                <td colspan='2'>汇票到期日</td>
+                                <td colspan='2'>{{data.dueDate}}</td>
+                                <td rowspan='2' style='padding:10px 0px'>
+                                  付款人开户行
+                                </td>
+                                  <td>
+                                   行号
+                                </td>
+                                <td>{{data.acceptorBankNo}}</td>
+                    
+                              </tr>
+                              <tr>
+                                <td colspan='2'>交易合同号</td>
+                                <td colspan='2'>{{data.contractNo}}</td>
+                                <td>地址</td>
+                                <td> {{data.acceptorBankAddr}}</td>
+                              </tr>
+                            </table> 
+
+                  
+						</div>
+
+					</div>
+				</div>
+
+                    <div class="row text-center" style='padding:10px 0px'>
+                <div class="col col-md-12 col-sm-12">
+                   <el-button type='primary' @click='back'>
+                  返回
+              </el-button>
+                </div>
+            </div>
+<big-img v-if="showImg" @clickit="viewImg" :imgSrc="imgSrc"></big-img>
+
+			</div>
+		</div>
+	</div>
+</template>
+<script>
+import BigImg from '../../components/BigImg.vue'
+	export default{
+       data(){
+       	return{
+       		id:'',
+       		version:'',
+       		billNo:'',
+       		data:[],
+          loading:false,
+          showImg:false,
+          brief:'',
+          picIndex:0,
+          imgSrc:''
+       	}
+       },
+         components:{
+        BigImg
+       },
+       methods:{
+       	getData(){
+       		let self=this;
+              var url='';
+          if(this.brief){
+             url= '/dingtalk/bill/view/init/'+this.version+'/'+this.id+'?brief=brief'
+          }
+          else{
+            url= '/dingtalk/bill/view/init/'+this.version+'/'+this.id
+            }
+       		this.$http.get(url)
+       		.then(res=>{
+       			console.log(res);
+                 if(res.data.code=='000000'){
+                     self.data=res.data.data;
+                     console.log(self.data)
+                     if(self.data.ocrStatus=="inOCR"){
+                         self.loading=true
+                     }
+                     else if(self.data.ocrStatus=="fail"){
+                      self.$router.push({path:'/ticks'});
+                     }
+                     else{
+                          self.loading=false
+                     }
+                     self.billNo=res.data.data.billNo;
+                 }
+       		})
+       	},
+          getItem(val,oldVal){
+            this.picIndex=val;
+        },
+         clickImg(){
+          let self=this;
+                this.showImg = true;
+                // 获取当前图片地址
+                    if(self.data.ocrStatus=="inOCR"||self.data.ocrStatus=="fail"){
+                         self.loading=false
+                     }
+                this.imgSrc = self.data.hostUrl+self.data.photoList[self.picIndex].picUrl;
+            },
+            viewImg(){
+              let self=this;
+                this.showImg = false;
+                    if(self.data.ocrStatus=="inOCR"||self.data.ocrStatus=="fail"){
+                         self.loading=true
+                     }
+            },
+        divNum(num){
+          Array.prototype.remove=function(obj){ //删除数组元素
+          for(var i =0;i <this.length;i++){ 
+             var temp = this[i]; 
+           if(!isNaN(obj)){ 
+             temp=i; 
+             } 
+             if(temp == obj){ 
+              for(var j = i;j <this.length;j++){ 
+                this[j]=this[j+1]; 
+                   } 
+             this.length = this.length-1; 
+              } 
+             } 
+             } 
+              num= this.returnFloat(Number(num));//转化为两位小数
+            var arr=String(num).split('');
+             arr.reverse();
+             arr.remove(2);
+            arr.reverse();//删除数组中的小数点
+           if(arr.length<12){
+          for(var i=arr.length;i<11;i++){
+            arr.unshift("");
+          }
+         }//扩展数组长度
+
+         return arr
+        },
+                    back(){
+             this.$router.push({path:'/ticks'})
+            },
+        returnFloat(value){//保留两位小数
+         var value=Math.round(parseFloat(value)*100)/100;
+        var xsd=value.toString().split(".");
+         if(xsd.length==1){
+         value=value.toString()+".00";
+            return value;
+          }
+          if(xsd.length>1){
+        if(xsd[1].length<2){
+         value=value.toString()+"0";
+           }
+          return value;
+         }
+          }
+       },
+       mounted(){
+       	this.id=this.$route.query.id;
+       	this.version=this.$route.query.version;
+       	this.billNo=this.$route.query.billNo;
+        this.brief=this.$route.query.brief;
+       	this.getData();
+   
+	   }
+	}
+</script>
+<style scoped>
+	.billTable{
+		width:100%;
+		height:200px;
+		background-color: white
+	}
+	.billTable tr td{
+		border:solid 1px #ddd;
+		text-align: center
+	}
+	  .row{
+        display: flex;
+       }
+       .el-dialog__header{
+       	text-align:left;
+       	background-color: #95aacf;
+       	line-height: 30px;
+       }
+       .el-dialog__title{
+       	color:white;
+       }
+       .editPic{
+       	width:200px;height:140px;
+       }
+       .innerDel{
+       	position:absolute;
+       	bottom: 0px;
+       	right:24px;
+       	border-radius: 0px
+       }
+       	 .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #20a0ff;
+    text-align: center
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 200px;
+    height: 140px;
+    line-height: 140px;
+    text-align: center;
+  }
+  .avatar {
+    width: 200px;
+    height: 140px;
+    display: block;
+  }
+   .el-upload--picture-card{
+  	width: 200px;
+    height: 140px;
+    display: block;
+
+  }
+   .el-upload__input{
+  	display: none
+  }
+  .amonts{
+    width:100%;
+    height:100%;
+    border:solid 0px white;
+    text-align: left
+  }
+  .tipss{
+  color:white;
+  position:absolute;
+  top:0px;
+  display:block;
+  width:50px;
+  height:30px;
+  background-color:black;
+  opacity:0.5
+}
+
+</style>
