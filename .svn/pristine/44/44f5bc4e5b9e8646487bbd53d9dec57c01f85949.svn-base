@@ -21,7 +21,7 @@ import {authCode} from '@/lib/util';
          }
 		},
 		created(){
-    this.maxHeight=this.$parent.$data.maxHeight;
+this.maxHeight=this.$parent.$data.maxHeight;
 		},
 		mounted(){
 			
@@ -51,6 +51,7 @@ import {authCode} from '@/lib/util';
          }
         this.$http.post('/dingtalk/open/get/singnature',body)
         .then(res=>{
+          DingTalkPC.ready(function(){
           DingTalkPC.config({
          agentId:res.data.data.agentId,
          timeStamp:res.data.data.timeStamp,
@@ -59,6 +60,7 @@ import {authCode} from '@/lib/util';
          corpId:res.data.data.corpId,
          jsApiList:['device.notification.alert', 'device.notification.confirm','biz.util.open']
           }); 
+          })
         }).then(function(){
             authCode(function(ress){
          self.getUserId({code:ress.code,corpId:self.corpId});

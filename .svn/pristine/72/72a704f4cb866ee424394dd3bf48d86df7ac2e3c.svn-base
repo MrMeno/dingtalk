@@ -2,8 +2,8 @@
 	<div class='container-fluid' style='padding-bottom:20px'>
 		<div class="row" style='padding:0px'>
 			<div class="col col-md-12 col-sm-12 text-left" style='padding:0px'>
-				   <div class="row" syle='padding-top:10px'>
-                <div class="col col-md-12 col-sm-12 text-left" style='padding:10px 10px 0px 20px'>
+				   <div class="row" style='padding:10px'>
+                <div class="col col-md-12 col-sm-12 text-left" style='padding:0px'>
                     票据
                 </div>
               </div>
@@ -175,7 +175,7 @@
                            	       		申请人
                            	       	</div>
                            	       	 	<div class="col col-md-8 col-sm-8">
-                           	       		{{scope.row.notice.applyName||'暂无'}}
+                           	       		{{scope.row.notice.applyName||''}}
                            	       	</div>
                            	       </div>
                            	        <div class="row" style='padding-top:5px'>
@@ -199,7 +199,7 @@
                            	       		公示时间
                            	       	</div>
                            	       	 	<div class="col col-md-8 col-sm-8">
-                           	       		{{dateFormat(new Date(scope.row.notice.noticeDate))||'暂无'}}
+                           	       		{{dateFormat(new Date(scope.row.notice.noticeDate))||''}}
                            	       	</div>
                            	       </div>
                            	       <div class="row" style='padding-top:5px'>
@@ -207,7 +207,7 @@
                            	       		截止时间
                            	       	</div>
                            	       	 	<div class="col col-md-8 col-sm-8">
-                           	       		{{dateFormat(new Date(scope.row.notice.deadline))||'暂无'}}
+                           	       		{{dateFormat(new Date(scope.row.notice.deadline))||''}}
                            	       	</div>
                            	       </div>
                            	  </div>

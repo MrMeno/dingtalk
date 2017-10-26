@@ -131,9 +131,11 @@ import {dateFormat,checkNum} from'../../lib/tools'
     },
     mounted(){
     this.rowHeight=this.$parent.$data.height
+      console.log(this.rowHeight)
     },
     methods: {
       handleClick(tab, event) {
+        console.log(tab, event);
       },
         getEnter(e){
         if(Number(e.keyCode)==13){
@@ -159,9 +161,7 @@ import {dateFormat,checkNum} from'../../lib/tools'
         if(this.isRight){   
           var params='?billNo='+self.billNo;
         this.$http.get('/dingtalk/tools/notice/list'+params).then(res=>{
-
            if(res.data.code=='000000'){
-
              self.data=res.data.data
            }
 

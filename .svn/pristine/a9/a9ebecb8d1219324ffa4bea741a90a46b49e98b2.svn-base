@@ -181,9 +181,9 @@
 
                              </div>
                            </div>
-                              <div class="row"  style='background-color:white;margin-top:-10px'>
+                              <div class="row"  style='padding:5px;background-color:white;margin-top:-10px'>
                                  <div class="col col-md-6 col-sm-6">
-                            <!--        <div class="row">
+                                   <div class="row">
                                       <div class="col col-md-4 col-sm-4 text-left">
                                         <el-row :gutter='10'>
                                           <el-col :span='3'>
@@ -191,24 +191,14 @@
                                           </el-col>
                                           <el-col :span='10'>
                                             <span style='display:block;height:16px;'>
-                                          <strong style='color:red;font-size:16px;white-space:nowrap;'> 
+                                          <strong style='color:red;font-size:16px'> 
                                           消息提醒
                                          </strong>
                                        </span>
                                           </el-col>
                                         </el-row>
                                        </div>
-                                </div> -->
-
-                                     <div class="row"  style='padding:10px 0px;background-color:white;'>
-                                 <div class="col col-md-12 col-sm-12" style='height:16px;'>
-                                     <span style='border-left:solid 4px #ffa722;'>
-                                     <span style='font-size:16px;padding-left:10px;white-space:nowrap;'>
-                                      消息提醒
-                                    </span>
-                                 </span>
-                                 </div>
-                               </div>
+                                </div>
                               </div>
                            </div>
                            <div class="row" style="background-color:white;padding:30px 0px;box-shadow:5px 5px 10px #ddd">
@@ -288,6 +278,7 @@
       getData(){
         let self=this;
         this.$http.get("/dingtalk/brief/list?falg="+this.flag+'&pageSize=10').then(res=>{
+ console.log(res);
           if(res.data.code=='000000'){
           self.briefData=res.data.data.brief||[];
                    

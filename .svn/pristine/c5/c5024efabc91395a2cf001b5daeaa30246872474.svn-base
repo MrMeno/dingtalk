@@ -236,6 +236,7 @@ import {dateFormat} from '../../lib/tools.js'
         addMonth(date, month){//日期，加的月数
         // 传入日期
         var oldDate = date;
+        console.log(oldDate)
         var oldDateArr = oldDate.split("-");
         // 计算正确的日期结束
         var calcDate = new Date(oldDateArr[0] + "-" + oldDateArr[1] + "-01");

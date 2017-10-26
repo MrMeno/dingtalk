@@ -10,17 +10,21 @@ export function alert(self,message){
     onFail : function(err) {}
 });
 }
-export function div(arg1, arg2) {//a/b
-     var t1=0,t2=0,r1,r2;
-    try{t1=arg1.toString().split(".")[1].length}catch(e){}
-    try{t2=arg2.toString().split(".")[1].length}catch(e){}
-        r1=Number(arg1.toString().replace(".",""));
-        r2=Number(arg2.toString().replace(".",""));
-        return (r1/r2)*Math.pow(10,t2-t1);
+export function div(a, b) {//a/b
+    var c, d, e = 0,
+        f = 0;
+    try {
+        e = a.toString().split(".")[1].length;
+    } catch (g) {}
+    try {
+        f = b.toString().split(".")[1].length;
+    } catch (g) {}
+    return c = Number(a.toString().replace(".", "")), d = Number(b.toString().replace(".", "")), mul(c / d, Math.pow(10, f - e));
 }
 
 /*获取用户ID*/
 export function authCode(cb,corpId){
+  DingTalkPC.ready(function(){
          DingTalkPC.runtime.permission.requestAuthCode({
         corpId:corpId,
         onSuccess (result){
@@ -30,6 +34,7 @@ export function authCode(cb,corpId){
           reject(err);
         }
       }); 
+    })
 }
 
 export function request (config, cb, progressCb) {
@@ -81,11 +86,12 @@ export function request (config, cb, progressCb) {
       // requestConf.body = querystring.stringify(body);
       requestConf.body = body
     }
-
+    console.log(requestConf)
     
     // 内建模块方法【发起网络请求】
     stream.fetch(requestConf,function(res) {
       !(other && other.noLoading) && hideLoading()
+      console.log(res)
       // toast("requestConf.url :  "+requestConf.url  +"[[[[" +JSON.stringify(res))
       if (res.ok) {
         if (res.data.code) {
@@ -154,6 +160,7 @@ export function checkNum16(num){
 /*判断是否六位小数*/
 export function checkFloat6(num){
   var arr=num.split('.');
+  console.log(arr);
   if(arr[1]){//是否是小数
     if(arr[1].length>6){
       return false
